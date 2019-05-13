@@ -174,11 +174,16 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             sys.exit(0)
 
 
-        
-bot = TheBot()
-bot.connect("irc.chat.twitch.tv", 6667, bot.config.BOT_NAME, password=bot.config.AUTH_ID)
-try:
-    bot.start()
-finally:
-    bot.connection.disconnect()
-    bot.reactor.loop.close()
+def main()
+    '''
+    Initializing the bot object, connecting to IRC, and running everything until it eventually dies
+    '''
+    bot = TheBot()
+    bot.connect("irc.chat.twitch.tv", 6667, bot.config.BOT_NAME, password=bot.config.AUTH_ID)
+    try:
+        bot.start()
+    finally:
+        bot.connection.disconnect()
+        bot.reactor.loop.close()
+if __name__ == "__main__":
+    main()
