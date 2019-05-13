@@ -1,95 +1,105 @@
-'''
-Copyright 2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
-
-    http://aws.amazon.com/apache2.0/
-
-or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-'''
-
 import sys
+import asyncio
 import irc.bot
-import requests
+import irc.client
+import irc.client_aio
+import irc.strings
+from conf import *
 
-class TwitchBot(irc.bot.SingleServerIRCBot):
-    def __init__(self, username, client_id, token, channel):
-        self.client_id = client_id
-        self.token = token
-        self.channel = '#' + channel
+class TheBot(irc.client_aio.AioSimpleIRCClient):
+    def __init__(self):
+        irc.client.SimpleIRCClient.__init__(self)
+        self.config = Conf(os.path.dirname(os.path.realpath(__file__))+"\\config.ini")
+        self.memory_config = CSVMemory(os.path.dirname(os.path.realpath(__file__))+"\\memory.csv")
+        self.memory = self.memory_config.persistentDict
+        self.target = self.config.CHANNEL_NAME
+        self.future = None
 
-        # Get the channel id, we will need this for v5 API calls
-        url = 'https://api.twitch.tv/kraken/users?login=' + channel
-        headers = {'Client-ID': client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
-        r = requests.get(url, headers=headers).json()
-        self.channel_id = r['users'][0]['_id']
+        self.rollcall = False
+        self.current_session_already_here = set()
+        self.modlist = self.config.MOD_LIST
+        self.host = self.config.HOST
 
-        # Create IRC bot connection
-        server = 'irc.chat.twitch.tv'
-        port = 6667
-        print 'Connecting to ' + server + ' on port ' + str(port) + '...'
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:'+token)], username, username)
-        
-
-    def on_welcome(self, c, e):
-        print 'Joining ' + self.channel
-
-        # You must request specific capabilities before you can use them
-        c.cap('REQ', ':twitch.tv/membership')
-        c.cap('REQ', ':twitch.tv/tags')
-        c.cap('REQ', ':twitch.tv/commands')
-        c.join(self.channel)
-
-    def on_pubmsg(self, c, e):
-
-        # If a chat message starts with an exclamation point, try to run it as a command
-        if e.arguments[0][:1] == '!':
-            cmd = e.arguments[0].split(' ')[0][1:]
-            print 'Received command: ' + cmd
-            self.do_command(e, cmd)
-        return
-
-    def do_command(self, e, cmd):
-        c = self.connection
-
-        # Poll the API to get current game.
-        if cmd == "game":
-            url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
-            headers = {'Client-ID': self.client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
-            r = requests.get(url, headers=headers).json()
-            c.privmsg(self.channel, r['display_name'] + ' is currently playing ' + r['game'])
-
-        # Poll the API the get the current status of the stream
-        elif cmd == "title":
-            url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
-            headers = {'Client-ID': self.client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
-            r = requests.get(url, headers=headers).json()
-            c.privmsg(self.channel, r['display_name'] + ' channel title is currently ' + r['status'])
-
-        # Provide basic information to viewers for specific commands
-        elif cmd == "raffle":
-            message = "This is an example bot, replace this text with your raffle text."
-            c.privmsg(self.channel, message)
-        elif cmd == "schedule":
-            message = "This is an example bot, replace this text with your schedule text."            
-            c.privmsg(self.channel, message)
-
-        # The command was not recognized
+    def on_welcome(self, connection, event):
+        if irc.client.is_channel(self.target):
+            connection.join(self.target)
+            print("Connected to the Server...")
         else:
-            c.privmsg(self.channel, "Did not understand command: " + cmd)
+            print("Something is wrong and shit's broken")
 
-def main():
-    if len(sys.argv) != 5:
-        print("Usage: twitchbot <username> <client id> <token> <channel>")
-        sys.exit(1)
+    def on_join(self, connection, event):
+        print("WE IN, BOYS")
+        self.future = asyncio.ensure_future(self.saving_loop(connection), loop=connection.reactor.loop)
 
-    username  = sys.argv[1]
-    client_id = sys.argv[2]
-    token     = sys.argv[3]
-    channel   = sys.argv[4]
+    def on_disconnect(self, connection, event):
+        self.future.cancel()
+        sys.exit(0)
+        
+    def on_pubmsg(self, connection, event):
+        #print(event.source.nick + ": " + event.arguments[0])
+        user = event.source.nick.lower()
+        params = event.arguments[0].split()
+        if params[0] == "!attendance":
+            if user in self.modlist:
+                self.cmd_toggle_rollcall()
+        elif params[0] == "!here":
+            self.cmd_acknowledge_rollcall(user)
+        elif params[0] == "!points":
+            if len(params) == 1:
+                self.cmd_checkpoints(user)
+            else:
+                self.cmd_checkpoints(params[1].strip("@"))
+        elif params[0] == "!shutdown":
+            self.cmd_shutdown(user)
+        if user not in self.memory:
+            self.memory[user] = (1,0)
+        else:
+            self.memory[user] = (self.memory[user][0] + 1, self.memory[user][1])
 
-    bot = TwitchBot(username, client_id, token, channel)
+    async def saving_loop(self, connection):
+        await asyncio.wait_for(asyncio.sleep(30), timeout=31, loop=connection.reactor.loop)
+        self.memory_config.save_data()
+        await self.saving_loop(connection)
+
+
+    def cmd_toggle_rollcall(self):
+        if not(self.rollcall):
+            self.rollcall = True
+            self.current_session_already_here = set()
+            self.connection.privmsg(self.target, "It's time to take attendance. Say !here to confirm.")
+        else:
+            self.rollcall = False
+            self.connection.privmsg(self.target, "You are now late to class. No points for you.")
+            self.memory_config.save_data()
+
+    def cmd_acknowledge_rollcall(self, user):
+        if self.rollcall:
+            if user not in self.current_session_already_here:
+                self.current_session_already_here.add(user)
+                if user not in self.memory:
+                    self.memory[user] = (1,1)
+                else:
+                    self.memory[user] = (self.memory[user][0], self.memory[user][1] + 1)
+
+    def cmd_checkpoints(self, user):
+        if user not in self.memory:
+            self.connection.privmsg(self.target, user + " has never been to class on time and responded to roll call.")
+        else:
+            self.connection.privmsg(self.target, user + " has "+str(self.memory[user][1])+" points.")
+
+    def cmd_shutdown(self, user):
+        if user == self.host:
+            self.memory_config.save_data()
+            print("Saving and quitting IRC...")
+            self.connection.quit()
+            sys.exit(0)
+
+
+        
+bot = TheBot()
+bot.connect("irc.chat.twitch.tv", 6667, bot.config.BOT_NAME, password=bot.config.AUTH_ID)
+try:
     bot.start()
-
-if __name__ == "__main__":
-    main()
+finally:
+    bot.connection.disconnect()
+    bot.reactor.loop.close()
