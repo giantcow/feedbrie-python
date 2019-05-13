@@ -22,6 +22,7 @@ class Conf:
 
         self.AUTH_ID = config.get("Password", "Token", fallback=Fallbacks.AUTH_ID)
         self.BOT_NAME = config.get("Names", "Bot Nickname", fallback=Fallbacks.BOT_NAME)
+        self.CLIENT_ID = config.get("Password", "Client ID", fallback=Fallbacks.CLIENT_ID)
         self.CHANNEL_NAME = config.get("Channel", "Name", fallback=Fallbacks.CHANNEL_NAME)
         self.MOD_LIST = config.get("Names", "Mod List", fallback=Fallbacks.MOD_LIST).split()
         for i in range(len(self.MOD_LIST)):
@@ -33,6 +34,7 @@ class Conf:
 class Fallbacks:  # these will only get used if the user leaves the config.ini existant but really messes something up... everything breaks if they get used.
     AUTH_ID = "mission failed"
     BOT_NAME = "incorrect_configuration"
+    CLIENT_ID = "got oofed"
     CHANNEL_NAME = "shroud"
     MOD_LIST = ["0", "1", "2"]
     HOST = "0fallback"
