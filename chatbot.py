@@ -174,7 +174,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             sys.exit(0)
 
 
-def main()
+def main():
     '''
     Initializing the bot object, connecting to IRC, and running everything until it eventually dies
     '''

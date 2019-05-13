@@ -117,3 +117,5 @@ dmypy.json
 # personal environment config files
 config.ini
 memory.csv
+
+\.idea/
