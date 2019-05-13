@@ -19,7 +19,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.modlist = self.config.MOD_LIST             # List of people who are defined as mod
         self.host = self.config.HOST                    # The name of the host of the bot
         
-        # for kraken (twitch api v5) stuff
+        # for kraken (new twitch api) stuff
         self.aio_session = None
         
         # for asyncio, separate loop from irc connection loop thing
@@ -98,7 +98,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         
     async def is_live(self):
         ''' 
-        Use twitch v5 api in a scuffed way to find out if a channel is live
+        Use new twitch api in a scuffed way to find out if a channel is live
         '''
         async with self.aio_session.get("https://api.twitch.tv/helix/users?login=" + self.channel_name) as response:
             # this provides either a result or nothing
