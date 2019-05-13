@@ -4,6 +4,9 @@ import shutil
 
 
 class Conf:
+    '''
+    Load configuration from a set ini file so we dont have to hardcode auth keys
+    '''
     def __init__(self, conf):
         self.options = conf
         config = configparser.ConfigParser(interpolation=None)
@@ -20,6 +23,8 @@ class Conf:
 
         config.read(conf, encoding='utf-8')
 
+        # these get methods let you fall back on errors or missing stuff, so its good
+        # we may want to retrieve the mod list from somewhere other than a defined ini list
         self.AUTH_ID = config.get("Password", "Token", fallback=Fallbacks.AUTH_ID)
         self.BOT_NAME = config.get("Names", "Bot Nickname", fallback=Fallbacks.BOT_NAME)
         self.CLIENT_ID = config.get("Password", "Client ID", fallback=Fallbacks.CLIENT_ID)
@@ -41,6 +46,10 @@ class Fallbacks:  # these will only get used if the user leaves the config.ini e
 
 
 class CSVMemory:
+    '''
+    Example plaintext comma separated file memory system
+    should be replaced with sqlite or some db if we arent lazy 
+    '''
     def __init__(self, conf):
         self.config_dir = conf
         self.the_file = self._load_file(self.config_dir)
