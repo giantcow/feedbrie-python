@@ -33,9 +33,9 @@ class Conf:
 class Fallbacks:  # these will only get used if the user leaves the config.ini existant but really messes something up... everything breaks if they get used.
     AUTH_ID = "mission failed"
     BOT_NAME = "incorrect_configuration"
-    CHANNEL_NAME = "#shroud"
+    CHANNEL_NAME = "shroud"
     MOD_LIST = ["0", "1", "2"]
-    HOST = "big_guy"
+    HOST = "0fallback"
 
 
 class CSVMemory:
@@ -72,8 +72,8 @@ class CSVMemory:
         except:
             try:
                 print(
-                    "I had to remake the config file from default. Please check the config and restart once the proper settings have been changed.")
-                print("The config should exist here: " + dir)
+                    "I had to remake the memory file from default. Please check everything and restart once the proper settings have been changed.")
+                print("The memory should exist here: " + dir)
                 shutil.copy(os.path.dirname(dir) + "\\example_memory.csv", dir)
 
             except:

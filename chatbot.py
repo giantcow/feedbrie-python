@@ -12,7 +12,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.config = Conf(os.path.dirname(os.path.realpath(__file__))+"\\config.ini")
         self.memory_config = CSVMemory(os.path.dirname(os.path.realpath(__file__))+"\\memory.csv")
         self.memory = self.memory_config.persistentDict
-        self.target = self.config.CHANNEL_NAME
+        self.target = "#" + self.config.CHANNEL_NAME    # The name of the twitch irc channel
         self.future = None
 
         self.rollcall = False
