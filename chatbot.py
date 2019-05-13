@@ -1,5 +1,6 @@
 import sys
 import asyncio
+import aiohttp
 import irc.bot
 import irc.client
 import irc.client_aio
@@ -14,6 +15,9 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.memory = self.memory_config.persistentDict
         self.target = "#" + self.config.CHANNEL_NAME    # The name of the twitch irc channel
         
+        # for kraken (twitch api v5) stuff
+        self.aio_session = None
+        
         # for asyncio, separate loop from irc connection loop thing
         self.eventloop = asyncio.get_event_loop()
 
@@ -21,7 +25,12 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.current_session_already_here = set()
         self.modlist = self.config.MOD_LIST
         self.host = self.config.HOST
-
+        
+        self.eventloop.create_task(self.set_aio())          # we have to get the aiosession in an async way because deprecated methods
+        
+    async def set_aio(self):
+        self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID})
+        
     def on_welcome(self, connection, event):
         if irc.client.is_channel(self.target):
             connection.join(self.target)
