@@ -7,6 +7,7 @@ import irc.client_aio
 import irc.strings
 from conf import *
 
+
 class TheBot(irc.client_aio.AioSimpleIRCClient):
     def __init__(self):
         irc.client.SimpleIRCClient.__init__(self)
@@ -14,6 +15,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.memory_config = CSVMemory(os.path.dirname(os.path.realpath(__file__))+"\\memory.csv")
         self.memory = self.memory_config.persistentDict
         self.target = "#" + self.config.CHANNEL_NAME    # The name of the twitch irc channel
+        self.channel_name = self.config.CHANNEL_NAME    # The display name of the twitch channel
         
         # for kraken (twitch api v5) stuff
         self.aio_session = None
@@ -62,6 +64,8 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
                 self.cmd_checkpoints(params[1].strip("@"))
         elif params[0] == "!shutdown":
             self.cmd_shutdown(user)
+        elif params[0] == "!live":
+            self.eventloop.create_task(self.send_is_live())
         if user not in self.memory:
             self.memory[user] = (1,0)
         else:
@@ -71,7 +75,39 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         await asyncio.wait_for(asyncio.sleep(30), timeout=31, loop=self.eventloop)
         self.memory_config.save_data()
         await self.saving_loop(connection)
-
+        
+    async def is_live(self):
+        ''' 
+        Use twitch v5 api in a scuffed way to find out if a channel is live
+        '''
+        async with self.aio_session.get("https://api.twitch.tv/helix/users?login=" + self.channel_name) as response:
+            # this provides either a result or nothing
+            # nothing is returned if the channel name doesnt exist
+            # and by nothing I mean response.json() appears as {"data": [ ], "pagination": [ ]}
+            json_response = await response.json()
+            channel_id = ""
+            try:
+                channel_id = json_response["data"][0]["id"]
+            except:
+                # this would fail if data was empty (it usually isnt)
+                print("Channel ID retrieval via login name failed.")
+            
+            async with self.aio_session.get("https://api.twitch.tv/helix/streams?user_id=" + channel_id) as response2:
+                # and this provides nothing (in the same format above) if the channel is offline
+                # i dont know why but that's how twitch works
+                json_response2 = await response2.json()
+                
+                # print( len(json_response2["data"]) != 0 )
+                return len(json_response2["data"]) != 0
+            
+    async def send_is_live(self):
+        '''
+        Send the is_live status to chat
+        '''
+        # i got bored and wanted to see if this was possible on one line
+        output = f"{self.channel_name} is {await self.is_live() and '' or 'not '}live"
+        
+        self.connection.privmsg(self.target, output)
 
     def cmd_toggle_rollcall(self):
         if not(self.rollcall):
