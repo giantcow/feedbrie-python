@@ -16,6 +16,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.memory = self.memory_config.persistentDict
         self.target = "#" + self.config.CHANNEL_NAME    # The name of the twitch irc channel
         self.channel_name = self.config.CHANNEL_NAME    # The display name of the twitch channel
+        self.channel_id = ""                            # ID is saved as a string because JSON sends it that way
         self.modlist = self.config.MOD_LIST             # List of people who are defined as mod
         self.host = self.config.HOST                    # The name of the host of the bot
         
@@ -81,6 +82,8 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             self.cmd_shutdown(user)
         elif params[0] == "!live":
             self.eventloop.create_task(self.send_is_live())
+        elif params[0] == "!mod":
+            self.eventloop.create_task(self.send_is_mod(user))
             
         # this puts the sender of the message into memory
         if user not in self.memory:
@@ -95,12 +98,16 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         await asyncio.wait_for(asyncio.sleep(30), timeout=31, loop=self.eventloop)
         self.memory_config.save_data()
         await self.saving_loop(connection)
-        
-    async def is_live(self):
-        ''' 
-        Use new twitch api in a scuffed way to find out if a channel is live
+
+    async def get_channel_id_by_name(self, specific_login = None):
         '''
-        async with self.aio_session.get("https://api.twitch.tv/helix/users?login=" + self.channel_name) as response:
+        Use new twitch api to get a channel id by login name
+        Pass a display name string to try a different channel name
+        '''
+        if specific_login is None:
+            specific_login = self.channel_name
+
+        async with self.aio_session.get("https://api.twitch.tv/helix/users?login=" + specific_login) as response:
             # this provides either a result or nothing
             # nothing is returned if the channel name doesnt exist
             # and by nothing I mean response.json() appears as {"data": [ ], "pagination": [ ]}
@@ -111,23 +118,65 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             except:
                 # this would fail if data was empty (it usually isnt)
                 print("Channel ID retrieval via login name failed.")
-            
-            async with self.aio_session.get("https://api.twitch.tv/helix/streams?user_id=" + channel_id) as response2:
-                # and this provides nothing (in the same format above) if the channel is offline
-                # i dont know why but that's how twitch works
-                json_response2 = await response2.json()
-                
-                # print( len(json_response2["data"]) != 0 )
-                return len(json_response2["data"]) != 0
+            return channel_id
+        
+    async def is_live(self, channel_id = None):
+        '''
+        Use new twitch api in a scuffed way to find out if a channel is live
+        Pass a channel id string to try a specific channel id
+        '''
+        # fallback to main channel ID if none is specified
+        if self.channel_id == "" and channel_id is None:
+            self.channel_id = await self.get_channel_id_by_name()
+            channel_id = self.channel_id
+        elif channel_id is None:
+            channel_id = self.channel_id
+
+        async with self.aio_session.get("https://api.twitch.tv/helix/streams?user_id=" + channel_id) as response:
+            # and this provides nothing (in the payload format) if the channel is offline
+            # i dont know why but that's how twitch works
+            json_response = await response.json()
+
+            return len(json_response["data"]) != 0
             
     async def send_is_live(self):
         '''
         Send the is_live status to chat
         '''
         # i got bored and wanted to see if this was possible on one line
-        output = f"{self.channel_name} is {await self.is_live() and '' or 'not '}live"
-        
+        output = f"{self.channel_name} is {'' if await self.is_live() else 'not '}live"
         self.connection.privmsg(self.target, output)
+
+    async def is_mod(self, user, channel_id = None):
+        '''
+        Use a dank undocumented v5 twitch api method to find the mod badge
+        But also use the new twitch api because IRC doesnt tell us the user id
+        '''
+        user_id = await self.get_channel_id_by_name(specific_login=user)
+        # fallback to main channel ID if none is specified
+        if self.channel_id == "" and channel_id is None:
+            self.channel_id = await self.get_channel_id_by_name()
+            channel_id = self.channel_id
+        elif channel_id is None:
+            channel_id = self.channel_id
+
+        async with self.aio_session.get(f"https://api.twitch.tv/kraken/users/{user_id}/chat/channels/{channel_id}?api_version=5") as response:
+            # the response on api v5, is simply { ... : ... } with lists or dicts optionally embedded
+            # it seems to always exist as far as i can tell
+            json_response = await response.json()
+
+            badges = json_response.get("badges", [])
+            for entry in badges:
+                if entry["id"] in ("moderator", "broadcaster"):
+                    return True
+            return False
+
+    async def send_is_mod(self, user):
+        '''
+        Send the is_mod status of a user to chat
+        '''
+        # round 2 of bored one liners
+        self.connection.privmsg(self.target, f"{user} is {'' if await self.is_mod(user) else 'not '}a mod")
 
     def cmd_toggle_rollcall(self):
         '''
