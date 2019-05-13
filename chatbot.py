@@ -38,7 +38,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             connection.join(self.target)
             print("Connected to the Server...")
         else:
-            print("Something is wrong and shit's broken")
+            print("Something is wrong and everything is broken (config is probably wrong)")
 
     def on_join(self, connection, event):
         print("WE IN, BOYS")
