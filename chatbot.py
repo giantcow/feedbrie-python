@@ -13,7 +13,9 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.memory_config = CSVMemory(os.path.dirname(os.path.realpath(__file__))+"\\memory.csv")
         self.memory = self.memory_config.persistentDict
         self.target = "#" + self.config.CHANNEL_NAME    # The name of the twitch irc channel
-        self.future = None
+        
+        # for asyncio, separate loop from irc connection loop thing
+        self.eventloop = asyncio.get_event_loop()
 
         self.rollcall = False
         self.current_session_already_here = set()
@@ -29,10 +31,10 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
 
     def on_join(self, connection, event):
         print("WE IN, BOYS")
-        self.future = asyncio.ensure_future(self.saving_loop(connection), loop=connection.reactor.loop)
+        self.eventloop.create_task(self.saving_loop(connection))
 
     def on_disconnect(self, connection, event):
-        self.future.cancel()
+        self.eventloop.stop()
         sys.exit(0)
         
     def on_pubmsg(self, connection, event):
@@ -57,7 +59,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             self.memory[user] = (self.memory[user][0] + 1, self.memory[user][1])
 
     async def saving_loop(self, connection):
-        await asyncio.wait_for(asyncio.sleep(30), timeout=31, loop=connection.reactor.loop)
+        await asyncio.wait_for(asyncio.sleep(30), timeout=31, loop=self.eventloop)
         self.memory_config.save_data()
         await self.saving_loop(connection)
 
