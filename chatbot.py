@@ -60,7 +60,8 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         self.eventloop.stop()
         sys.exit(0)
-        
+
+    # Sub module dispatcher should be this function (this is the main menu essentially)  
     def on_pubmsg(self, connection, event):
         '''
         Event run for every message sent in the IRC Channel
@@ -68,6 +69,8 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         #print(event.source.nick + ": " + event.arguments[0])
         user = event.source.nick.lower()
         params = event.arguments[0].split()
+
+        # TODO: change this to a switch-case, things are gonna get messy
         if params[0] == "!attendance":
             if user in self.modlist:
                 self.cmd_toggle_rollcall()
@@ -91,7 +94,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         else:
             self.memory[user] = (self.memory[user][0] + 1, self.memory[user][1])
 
-    async def saving_loop(self, connection):
+    async def saving_loop(self, connection): # is there a better way to do this?
         '''
         An async loop to save the memory to disk every 30 seconds
         '''
