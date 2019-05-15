@@ -40,6 +40,9 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         Event run on entrance to the IRC
         '''
         if irc.client.is_channel(self.target):
+            connection.cap("REQ", ":twitch.tv/membership")
+            connection.cap("REQ", ":twitch.tv/tags")
+            connection.cap("REQ", ":twitch.tv/commands")
             connection.join(self.target)
             print("Connected to the Server...")
         else:

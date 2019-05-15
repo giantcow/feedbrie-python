@@ -41,6 +41,16 @@ class CommandHandler:
     # To check for live status:
     # is_live = await self.parent.is_live()
 
+    def send_message(self, msg, recipient=None):
+        '''
+        Simple wrapper to send a message.
+        If a recipient is given, it needs to be in the format of a user name only. That will send a DM.
+        '''
+        if recipient is not None:
+            self.parent.connection.privmsg(recipient, msg)
+        else:
+            self.parent.connection.privmsg(self.parent.target, msg)
+
     async def parse_for_command(self, user, message):
         '''
         Run a function defined within this class that matches the message
@@ -89,7 +99,9 @@ class CommandHandler:
 
         try:
             await command(**kwargs)
-            pass # reach this point if we succeed
+            #
+            # reach this point if we succeed, do whatever you want here
+            #
         except SystemExit:
             pass
         except BrieError as e: # Handling all failures
@@ -116,7 +128,7 @@ class CommandHandler:
         Direct Message a user the help guide.
         '''
         # Left args in for specificity on commands for later, if wanted
-        pass
+        self.send_message("This is a test.")
 
     async def cmd_stats(self, user, args):
         '''
