@@ -49,6 +49,9 @@ class CommandHandler:
             return False
 
         message = message[1:] # remove the prefix
+        if len(message) == 0: # if it was only a prefix, fail
+            return False
+
         parts = message.split()
         name = parts[0]
         if name in self._aliases: # check if the word is an alias for a command
@@ -86,6 +89,7 @@ class CommandHandler:
 
         try:
             await command(**kwargs)
+            pass # reach this point if we succeed
         except SystemExit:
             pass
         except BrieError as e: # Handling all failures
