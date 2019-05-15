@@ -30,6 +30,7 @@ class Conf:
         self.CLIENT_ID = config.get("Password", "Client ID", fallback=Fallbacks.CLIENT_ID)
         self.CHANNEL_NAME = config.get("Channel", "Name", fallback=Fallbacks.CHANNEL_NAME)
         self.HOST = config.get("Names", "Host", fallback=Fallbacks.HOST).lower()
+        self.PREFIX = config.get("Commands", "Prefix", fallback=Fallbacks.PREFIX)
 
 
 
@@ -39,6 +40,7 @@ class Fallbacks:  # these will only get used if the user leaves the config.ini e
     CLIENT_ID = "got oofed"
     CHANNEL_NAME = "shroud"
     HOST = "0fallback"
+    PREFIX = "!"
 
 
 class CSVMemory:
