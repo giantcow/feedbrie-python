@@ -17,7 +17,6 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.target = "#" + self.config.CHANNEL_NAME    # The name of the twitch irc channel
         self.channel_name = self.config.CHANNEL_NAME    # The display name of the twitch channel
         self.channel_id = ""                            # ID is saved as a string because JSON sends it that way
-        self.modlist = self.config.MOD_LIST             # List of people who are defined as mod
         self.host = self.config.HOST                    # The name of the host of the bot
         
         # for kraken (new twitch api) stuff

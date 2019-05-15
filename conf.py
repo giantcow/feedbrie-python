@@ -29,9 +29,6 @@ class Conf:
         self.BOT_NAME = config.get("Names", "Bot Nickname", fallback=Fallbacks.BOT_NAME)
         self.CLIENT_ID = config.get("Password", "Client ID", fallback=Fallbacks.CLIENT_ID)
         self.CHANNEL_NAME = config.get("Channel", "Name", fallback=Fallbacks.CHANNEL_NAME)
-        self.MOD_LIST = config.get("Names", "Mod List", fallback=Fallbacks.MOD_LIST).split()
-        for i in range(len(self.MOD_LIST)):
-            self.MOD_LIST[i] = self.MOD_LIST[i].lower()
         self.HOST = config.get("Names", "Host", fallback=Fallbacks.HOST).lower()
 
 
@@ -41,7 +38,6 @@ class Fallbacks:  # these will only get used if the user leaves the config.ini e
     BOT_NAME = "incorrect_configuration"
     CLIENT_ID = "got oofed"
     CHANNEL_NAME = "shroud"
-    MOD_LIST = ["0", "1", "2"]
     HOST = "0fallback"
 
 
