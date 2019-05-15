@@ -6,6 +6,7 @@ import irc.client
 import irc.client_aio
 import irc.strings
 from conf import *
+from commands import CommandHandler
 
 
 class TheBot(irc.client_aio.AioSimpleIRCClient):
@@ -19,23 +20,21 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.channel_id = ""                            # ID is saved as a string because JSON sends it that way
         self.host = self.config.HOST                    # The name of the host of the bot
         
-        # for kraken (new twitch api) stuff
+        # for twitch api stuff
         self.aio_session = None
         
         # shortcut to the async loop
         self.loop = self.connection.reactor.loop
 
-        # command related variables
-        self.rollcall = False
-        self.current_session_already_here = set()
+        # command handler stuff
+        self.command_handler = CommandHandler(self, self.config.PREFIX)
         
         # we have to get the aiosession in an async way because deprecated methods
         self.loop.create_task(self.set_aio())
         
-        
     async def set_aio(self):
         self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID})
-        
+
     def on_welcome(self, connection, event):
         '''
         Event run on entrance to the IRC
@@ -65,33 +64,13 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         Event run for every message sent in the IRC Channel
         '''
-        #print(event.source.nick + ": " + event.arguments[0])
+        # print(event.source.nick + ": " + event.arguments[0])
         user = event.source.nick.lower()
-        params = event.arguments[0].split()
+        message = event.arguments[0]
 
-        # TODO: change this to a switch-case, things are gonna get messy
-        if params[0] == "!attendance":
-            if user in self.modlist:
-                self.cmd_toggle_rollcall()
-        elif params[0] == "!here":
-            self.cmd_acknowledge_rollcall(user)
-        elif params[0] == "!points":
-            if len(params) == 1:
-                self.cmd_checkpoints(user)
-            else:
-                self.cmd_checkpoints(params[1].strip("@"))
-        elif params[0] == "!shutdown":
-            self.cmd_shutdown(user)
-        elif params[0] == "!live":
-            self.eventloop.create_task(self.send_is_live())
-        elif params[0] == "!mod":
-            self.eventloop.create_task(self.send_is_mod(user))
-            
-        # this puts the sender of the message into memory
-        if user not in self.memory:
-            self.memory[user] = (1,0)
-        else:
-            self.memory[user] = (self.memory[user][0] + 1, self.memory[user][1])
+        self.loop.create_task(
+            self.command_handler.parse_for_command(user, message)
+        )
 
     async def saving_loop(self): # is there a better way to do this?
         '''
@@ -179,51 +158,6 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         # round 2 of bored one liners
         self.connection.privmsg(self.target, f"{user} is {'' if await self.is_mod(user) else 'not '}a mod")
-
-    def cmd_toggle_rollcall(self):
-        '''
-        Toggle the ability for chat to say they are here
-        '''
-        if not(self.rollcall):
-            self.rollcall = True
-            self.current_session_already_here = set()
-            self.connection.privmsg(self.target, "It's time to take attendance. Say !here to confirm.")
-        else:
-            self.rollcall = False
-            self.connection.privmsg(self.target, "You are now late to class. No points for you.")
-            self.memory_config.save_data()
-
-    def cmd_acknowledge_rollcall(self, user):
-        '''
-        Chat's ability to say they are present and get a point
-        '''
-        if self.rollcall:
-            if user not in self.current_session_already_here:
-                self.current_session_already_here.add(user)
-                if user not in self.memory:
-                    self.memory[user] = (1,1)
-                else:
-                    self.memory[user] = (self.memory[user][0], self.memory[user][1] + 1)
-
-    def cmd_checkpoints(self, user):
-        '''
-        Check a given user's points
-        '''
-        if user not in self.memory:
-            self.connection.privmsg(self.target, user + " has never been to class on time and responded to roll call.")
-        else:
-            self.connection.privmsg(self.target, user + " has "+str(self.memory[user][1])+" points.")
-
-    def cmd_shutdown(self, user):
-        '''
-        Close the bot from chat/IRC
-        '''
-        if user == self.host:
-            self.memory_config.save_data()
-            print("Saving and quitting IRC...")
-            self.connection.quit()
-            sys.exit(0)
-
 
 def main():
     '''
