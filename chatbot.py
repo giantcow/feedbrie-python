@@ -22,15 +22,15 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         # for kraken (new twitch api) stuff
         self.aio_session = None
         
-        # for asyncio, separate loop from irc connection loop thing
-        self.eventloop = asyncio.get_event_loop()
+        # shortcut to the async loop
+        self.loop = self.connection.reactor.loop
 
         # command related variables
         self.rollcall = False
         self.current_session_already_here = set()
         
         # we have to get the aiosession in an async way because deprecated methods
-        self.eventloop.create_task(self.set_aio())
+        self.loop.create_task(self.set_aio())
         
         
     async def set_aio(self):
@@ -51,13 +51,13 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         Event run on entrance to the IRC Channel
         '''
         print("WE IN, BOYS")
-        self.eventloop.create_task(self.saving_loop(connection))
+        self.loop.create_task(self.saving_loop())
 
     def on_disconnect(self, connection, event):
         '''
         Event run on disconnecting from IRC
         '''
-        self.eventloop.stop()
+        # Changed handling in main(). This should work with SystemExit Exception.
         sys.exit(0)
 
     # Sub module dispatcher should be this function (this is the main menu essentially)  
@@ -93,13 +93,13 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         else:
             self.memory[user] = (self.memory[user][0] + 1, self.memory[user][1])
 
-    async def saving_loop(self, connection): # is there a better way to do this?
+    async def saving_loop(self): # is there a better way to do this?
         '''
         An async loop to save the memory to disk every 30 seconds
         '''
-        await asyncio.wait_for(asyncio.sleep(30), timeout=31, loop=self.eventloop)
-        self.memory_config.save_data()
-        await self.saving_loop(connection)
+        while True:
+            await asyncio.sleep(30)
+            self.memory_config.save_data()
 
     async def get_channel_id_by_name(self, specific_login = None):
         '''
@@ -233,6 +233,11 @@ def main():
     bot.connect("irc.chat.twitch.tv", 6667, bot.config.BOT_NAME, password=bot.config.AUTH_ID)
     try:
         bot.start()
+    except SystemExit:
+        for t in asyncio.Task.all_tasks():
+            t.cancel()
+        bot.reactor.loop.run_until_complete(bot.reactor.loop.shutdown_asyncgens())
+        bot.reactor.loop.stop()
     finally:
         bot.connection.disconnect()
         bot.reactor.loop.close()
