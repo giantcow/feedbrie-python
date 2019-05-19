@@ -86,10 +86,7 @@ class CommandHandler:
             if this_cooldown[user] > now:
                 print("Cooldown failed.")
                 return False
-            else:
-                this_cooldown[user] = now + 60.0
-        else:
-            this_cooldown[user] = now + 60.0
+
 
         parts.pop(0)
         params = inspect.signature(command).parameters.copy()
@@ -120,7 +117,9 @@ class CommandHandler:
             await command(**kwargs)
             #
             # reach this point if we succeed, do whatever you want here
-            #
+            # Any fully successful command will set a new cooldown.
+            this_cooldown[user] = now + 60.0
+
         except SystemExit:
             pass
         except BrieError as e: # Handling all failures
