@@ -1,5 +1,6 @@
 import inspect
 import traceback
+import time
 
 class NotEnoughArgsError(Exception):
     def __init__(self, num):
@@ -34,6 +35,11 @@ class CommandHandler:
         self._aliases = {
             "sd" : "shutdown"
         }
+
+        # command cooldown dict
+        # keys are command names, values are dicts
+        #   keys of that dict are usernames, values are a timestamp
+        self.cooldowns = {f[4:] : {} for f in dir(self) if f[:4] == "cmd_"}
 
     # To check for mod powers:
     # is_mod = await self.parent.is_mod(username)
@@ -71,6 +77,19 @@ class CommandHandler:
         command = getattr(self, f"cmd_{name}", None)
         if command is None:
             return False
+
+        # Check for cooldown timestamp failure
+        # If the timestamp is in the past, success (if it's greater than now, fail)
+        now = time.time()
+        this_cooldown = self.cooldowns[name]
+        if user in this_cooldown:
+            if this_cooldown[user] > now:
+                print("Cooldown failed.")
+                return False
+            else:
+                this_cooldown[user] = now + 60.0
+        else:
+            this_cooldown[user] = now + 60.0
 
         parts.pop(0)
         params = inspect.signature(command).parameters.copy()
