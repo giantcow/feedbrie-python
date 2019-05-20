@@ -1,6 +1,7 @@
 import inspect
 import traceback
 import time
+from streamElements import StreamElementsAPI
 
 class NotEnoughArgsError(Exception):
     def __init__(self, num):
@@ -30,6 +31,8 @@ class CommandHandler:
     def __init__(self, parent, prefix):
         self.parent = parent
         self.prefix = prefix
+
+        self.se = StreamElementsAPI(parent.config.SE_ID, parent.aio_session)
 
         # command aliases. may be scrapped if not needed
         self._aliases = {

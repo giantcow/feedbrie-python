@@ -25,15 +25,15 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         
         # shortcut to the async loop
         self.loop = self.connection.reactor.loop
+        
+        # we have to get the aiosession in an async way because deprecated methods
+        self.loop.create_task(self.set_aio())
 
         # command handler stuff
         self.command_handler = CommandHandler(self, self.config.PREFIX)
         
-        # we have to get the aiosession in an async way because deprecated methods
-        self.loop.create_task(self.set_aio())
-        
     async def set_aio(self):
-        self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID})
+        self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID, "Authorization": "Bearer %s" % self.config.JWT_ID})
 
     def on_welcome(self, connection, event):
         '''
