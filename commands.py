@@ -32,7 +32,8 @@ class CommandHandler:
         self.parent = parent
         self.prefix = prefix
 
-        self.se = StreamElementsAPI(parent.config.SE_ID, parent.aio_session)
+        # streamElements api implementation access
+        self.se = StreamElementsAPI(parent.config.SE_ID, parent.config.JWT_ID, parent.loop)
 
         # command aliases. may be scrapped if not needed
         self._aliases = {
@@ -142,6 +143,7 @@ class CommandHandler:
             self.parent.memory_config.save_data()
             print("Saving and quitting IRC...")
             await self.parent.aio_session.close()
+            await self.se.aio_session.close()
             self.parent.connection.quit()
 
     async def cmd_help(self, user, args):
