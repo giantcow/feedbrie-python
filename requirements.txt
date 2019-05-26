@@ -16,6 +16,7 @@ jaraco.stream==2.0
 jaraco.text==3.0
 more-itertools==7.0.0
 multidict==4.5.2
+mysqlclient==1.4.2
 pytz==2019.1
 six==1.12.0
 tempora==1.14.1
