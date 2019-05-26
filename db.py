@@ -9,19 +9,39 @@ epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(mess
 log.setLevel(logging.DEBUG)
 log.addHandler(epicfilehandler)
 
-mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie')
+mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
 cursor = mariadb_connection.cursor()
 
-# Enable autocommit
-cursor.execute("SET AUTOCOMMIT=1") # https://mariadb.com/resources/blog/every-select-from-your-python-program-may-acquire-a-metadata-lock/
+class DatabaseError(Exception):
+    def __init__(self, message="This is a generic database error."):
+        self.message = message
+
+class InvalidFieldError(Exception):
+    def __init__(self, field, table="users"):
+        self.message = f"{field} is not a valid column in the {table} table!"
+
+class NonBooleanType(Exception):
+    def __init__(self, message="The passed variable must be of type boolean!"):
+        self.message = message
+
+class InvaludUserIdType(Exception):
+    def __init__(self, user_id):
+        self.message = f"{user_id} is not a valid user id!"
 
 class Database():
 
-    #########################
-    #                       #
-    #       USER TABLE      #
-    #                       #
-    #########################
+    def __get_table_fields(table):
+        fields = []
+        try:
+            cursor.execute("SHOW COLUMNS FROM %s", [table])
+            res = cursor.fetchall()
+            for field in res:
+                field.append(field[0])
+            return fields
+        except mariadb.Error as error:
+            log.error("Failed to get table columns: %s", error)
+
+    __user_fields = __get_table_fields("users")
 
     async def create_new_user(user_id, username):
         '''
@@ -43,122 +63,69 @@ class Database():
         '''
         Returns timestamp for when the user entry was created.
         '''
+        try:
+            cursor.execute("SELECT created_at FROM users WHERE user_id = %s", [user_id])
+            res = cursor.fetchall()
+            return res[0][0]
+        except mariadb.Error as error:
+            log.error("Failed to get created_at timestamp for user_id: %s \n %s" % (user_id, error))
 
-    async def get_last_update_timestamp(user_id):
+    async def get_updated_timestamp(user_id):
         '''
         Returns the last time the given User's entry was updated.
         '''
+        try:
+            cursor.execute("SELECT updated_at FROM users WHERE user_id = %s", [user_id])
+            res = cursor.fetchall()
+            return res[0][0]
+        except mariadb.Error as error:
+            log.error("Failed to get updated_at timestamp for user_id: %s \n %s" % (user_id, error))
 
-    #################
-    #   Affection   #
-    #################
-    async def set_affection(user_id, points):
-        '''
-        Sets User's affections points to a given value.
-        '''
+    async def set_value(index, val_name, val):
+        if val_name not in __user_fields: raise InvalidFieldError(field=val_name)
 
-    async def add_affection(user_id, points):
-        '''
-        Increases given User's affection points by given value.
-        - points must be positive int.
-        '''
-
-    async def remove_affection(user_id, points):
-        '''
-        Decreases given User's affection points by given value.
-        - points must be a positive int.
-        '''
-
-    async def get_affection(user_id):
-        '''
-        Returns User's current affection level
-        '''
-
-    ###################
-    #   Bond Levels   #
-    ###################
-    async def set_bond_level(user_id, level):
-        '''
-        Sets User's bond level to given value.
-        '''
-
-    async def add_bond_level(user_id, level):
-        '''
-        Increases User's bond level to given value.
-        - level must be a positive int.
-        '''
+        try:
+            cursor.execute("UPDATE users SET %s = %s WHERE user_id = %s", (val_name, val, index))
+        except mariadb.Error as error:
+            log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
     
-    async def remove_bond_level(user_id, level):
-        '''
-        Decreases given User's bond level by given value.
-        - level must be a positive int.
-        '''
+    async def add_value(index, val_name, val):
+        if val_name not in __user_fields: raise InvalidFieldError(field=val_name)
 
-    async def get_bond_level(user_id):
-        '''
-        Returns User's current bond level.
-        '''
+        try:
+            cursor.execute("UPDATE users SET %s = %s + %s WHERE user_id = %s", (val_name, val_name, val, index))
+        except mariadb.Error as error:
+            log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
 
-    #############
-    #   Bonds   #
-    #############
-    async def set_bonds_available(user_id, bonds):
-        '''
-        Sets User's bonds available to them.
-        '''
+    async def remove_value(index, val_name, val):
+        if val_name not in __user_fields: raise InvalidFieldError(field=val_name)
 
-    async def add_bonds(user_id, bonds):
-        '''
-        Increases User's bonds by given value.
-        - bonds must be a positive int.
-        '''
+        try:
+            cursor.execute("UPDATE users SET %s = %s - %s WHERE user_id = %s", (val_name, val_name, val, index))
+        except mariadb.Error as error:
+            log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
 
-    async def remove_bonds(user_id, bonds):
-        '''
-        Decreases User's bond by given value.
-        - bonds must be a positive int.
-        '''
+    async def get_value(index, val_name):
+        if val_name not in __user_fields: raise InvalidFieldError(field=val_name)
 
-    async def get_bonds(user_id):
-        '''
-        Returns User's available bonds.
-        '''
+        try:
+            cursor.execute("SELECT %s FROM users WHERE user_id = %s", (index, val_name))
+            res = cursor.fetchall()
+            return res[0][0]
+        except mariadb.Error as error:
+            log.error("Failed to get %s for user_id: %s \n %s" % (val_name, index, error))
 
     #################
     #   Feeding     #
     #################
-    async def set_has_fed_brie(user_id, has_fed):
+    async def set_fed_brie_timestamp(user_id, fed_timestamp=time.time().dt.datetime.fromtimestamp(now).strftime("%Y-%m-%d %H:%M:%S")):
         '''
-        Sets User's has_fed status.
-        - has_fed must be a Boolean, this will be saved as a 1 (True) or 0 (False).
-        - If has_fed is True, update the lastFedBrieTimestamp value as well.
+        Updates the last time a user has fed Brie.
         '''
-
-    async def flip_has_fed_brie(user_id):
-        '''
-        Flips the value of the given User's has_fed status.
-        '''
+        set_value(user_id, "last_fed_brie_timestamp", fed_timestamp)
 
     async def get_last_fed_timestamp(user_id):
         '''
         Returns timestamp of User's last feeding.
         '''
-
-    #################
-    #   Happiness   #
-    #################
-
-    async def set_current_happiness_level(user_id, level):
-        '''
-        Sets current happiness level for a given user.
-        '''
-
-    async def add_current_happiness_level(user_id, amount):
-        '''
-        Increases current happiness level by given amount for a given user.
-        '''
-
-    async def get_current_happiness_level(user_id):
-        '''
-        Returns current happiness level for a given user.
-        '''
+        return get_value(user_id, "last_fed_brie_timestamp")
