@@ -16,8 +16,8 @@ class NotEnoughArgsError(Exception):
         self.message = f"Not enough arguments provided. Requires {f'{num} more argument' if num == 1 else f'{num} more arguments'}."
 
 class BrieError(Exception):
-    def __init__(self):
-        self.message = "This is a generic Brie error."
+    def __init__(self, message="This is a generic Brie error."):
+        self.message = message
 
 class NotEnoughSPError(BrieError):
     def __init__(self, has, required):
@@ -144,7 +144,8 @@ class CommandHandler:
         except SystemExit:
             pass
         except BrieError as e: # Handling all failures
-            print(user, "FAILED:", e.message)
+            # print(user, "FAILED:", e.message)
+            log.info(f"{user} failed command {name}: {e.message}")
         except NotEnoughArgsError as e: # Handling basic missing arg failures
             # print(user, "MISSING ARGS:", e.message)
             log.info(f"{user} failed command {name}: {e.message}")
@@ -201,7 +202,7 @@ class CommandHandler:
         try:
             amount = int(args[1])
         except:
-            raise BrieError
+            raise BrieError("The second argument given could not be converted to an integer.")
         new_amount = await self.se.set_user_points(target, amount)
         self.send_message(f"set {target} points to {new_amount}")
         return True
