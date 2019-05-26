@@ -13,7 +13,7 @@ class StreamElementsAPI:
         self.loop.create_task(self.set_aio(jwt_id))
 
     async def set_aio(self, jwt_id):
-        self.aio_session = aiohttp.ClientSession(headers={"Authorization": "Bearer %s" % jwt_id})
+        self.aio_session = aiohttp.ClientSession(headers={"Authorization": "Bearer %s" % jwt_id, "User-Agent": "Brie/0.1 (+https://brie.everything.moe/)"})
 
     async def get_user_points(self, user):
         async with self.aio_session.get('https://api.streamelements.com/kappa/v2/points/%s/%s' % (self.channel, user)) as response:

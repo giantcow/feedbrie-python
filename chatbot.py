@@ -33,7 +33,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.command_handler = CommandHandler(self, self.config.PREFIX)
         
     async def set_aio(self):
-        self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID, "Authorization": "Bearer %s" % self.config.JWT_ID})
+        self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID, "Authorization": "Bearer %s" % self.config.JWT_ID, "User-Agent": "Brie/0.1 (+https://brie.everything.moe/)"})
 
     def on_welcome(self, connection, event):
         '''
