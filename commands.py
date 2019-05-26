@@ -2,7 +2,7 @@ import inspect
 import traceback
 import time
 from streamElements import StreamElementsAPI
-from db import Database
+from db import Database as db
 
 class NotEnoughArgsError(Exception):
     def __init__(self, num):
@@ -45,8 +45,6 @@ class CommandHandler:
         # keys are command names, values are dicts
         #   keys of that dict are usernames, values are a timestamp
         self.cooldowns = {f[4:] : {} for f in dir(self) if f[:4] == "cmd_"}
-
-        self.db = Database()
 
     # To check for mod powers:
     # is_mod = await self.parent.is_mod(username)
@@ -149,11 +147,11 @@ class CommandHandler:
             await self.se.aio_session.close()
             self.parent.connection.quit()
 
-    async def cmd_tu(self, user):
+    async def cmd_tu(self, uid):
         '''
         test user create
         '''
-        await self.db.create_new_user(user)
+        await db.create_new_user(uid)
 
     async def cmd_test_getpoints(self, user):
         '''

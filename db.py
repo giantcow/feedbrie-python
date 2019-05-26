@@ -19,7 +19,7 @@ class Database():
     #                       #
     #########################
 
-    async def create_new_user(self, username):
+    async def create_new_user(username):
         '''
         Creates new user entry with default values from config.
         '''
