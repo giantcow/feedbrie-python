@@ -39,12 +39,12 @@ class Database():
         except mariadb.Error as error:
             log.error("Failed to create new user: %s", error)
 
-    async def get_created_timestamp(username):
+    async def get_created_timestamp(user_id):
         '''
         Returns timestamp for when the user entry was created.
         '''
 
-    async def get_last_update_timestamp(username):
+    async def get_last_update_timestamp(user_id):
         '''
         Returns the last time the given User's entry was updated.
         '''
@@ -52,24 +52,24 @@ class Database():
     #################
     #   Affection   #
     #################
-    async def set_affection(username, points):
+    async def set_affection(user_id, points):
         '''
         Sets User's affections points to a given value.
         '''
 
-    async def add_affection(username, points):
+    async def add_affection(user_id, points):
         '''
         Increases given User's affection points by given value.
         - points must be positive int.
         '''
 
-    async def remove_affection(username, points):
+    async def remove_affection(user_id, points):
         '''
         Decreases given User's affection points by given value.
         - points must be a positive int.
         '''
 
-    async def get_affection(username):
+    async def get_affection(user_id):
         '''
         Returns User's current affection level
         '''
@@ -77,24 +77,24 @@ class Database():
     ###################
     #   Bond Levels   #
     ###################
-    async def set_bond_level(username, level):
+    async def set_bond_level(user_id, level):
         '''
         Sets User's bond level to given value.
         '''
 
-    async def add_bond_level(username, level):
+    async def add_bond_level(user_id, level):
         '''
         Increases User's bond level to given value.
         - level must be a positive int.
         '''
     
-    async def remove_bond_level(username, level):
+    async def remove_bond_level(user_id, level):
         '''
         Decreases given User's bond level by given value.
         - level must be a positive int.
         '''
 
-    async def get_bond_level(username):
+    async def get_bond_level(user_id):
         '''
         Returns User's current bond level.
         '''
@@ -102,24 +102,24 @@ class Database():
     #############
     #   Bonds   #
     #############
-    async def set_bonds_available(username, bonds):
+    async def set_bonds_available(user_id, bonds):
         '''
         Sets User's bonds available to them.
         '''
 
-    async def add_bonds(username, bonds):
+    async def add_bonds(user_id, bonds):
         '''
         Increases User's bonds by given value.
         - bonds must be a positive int.
         '''
 
-    async def remove_bonds(username, bonds):
+    async def remove_bonds(user_id, bonds):
         '''
         Decreases User's bond by given value.
         - bonds must be a positive int.
         '''
 
-    async def get_bonds(username):
+    async def get_bonds(user_id):
         '''
         Returns User's available bonds.
         '''
@@ -127,19 +127,19 @@ class Database():
     #################
     #   Feeding     #
     #################
-    async def set_has_fed_brie(username, has_fed):
+    async def set_has_fed_brie(user_id, has_fed):
         '''
         Sets User's has_fed status.
         - has_fed must be a Boolean, this will be saved as a 1 (True) or 0 (False).
         - If has_fed is True, update the lastFedBrieTimestamp value as well.
         '''
 
-    async def flip_has_fed_brie(username):
+    async def flip_has_fed_brie(user_id):
         '''
         Flips the value of the given User's has_fed status.
         '''
 
-    async def get_last_fed_timestamp(username):
+    async def get_last_fed_timestamp(user_id):
         '''
         Returns timestamp of User's last feeding.
         '''
@@ -148,17 +148,17 @@ class Database():
     #   Happiness   #
     #################
 
-    async def set_current_happiness_level(username, level):
+    async def set_current_happiness_level(user_id, level):
         '''
         Sets current happiness level for a given user.
         '''
 
-    async def add_current_happiness_level(username, amount):
+    async def add_current_happiness_level(user_id, amount):
         '''
         Increases current happiness level by given amount for a given user.
         '''
 
-    async def get_current_happiness_level(username):
+    async def get_current_happiness_level(user_id):
         '''
         Returns current happiness level for a given user.
         '''
