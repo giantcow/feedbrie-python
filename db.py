@@ -5,7 +5,7 @@ import datetime as dt
 
 log.basicConfig(filename='database.log',level=log.DEBUG)
 
-mariadb_connection = mariadb.connect(host="localhost", user='root', password='', db='brie')
+mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie')
 cursor = mariadb_connection.cursor()
 
 # Enable autocommit
