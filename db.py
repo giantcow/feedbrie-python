@@ -23,16 +23,18 @@ class Database():
     #                       #
     #########################
 
-    async def create_new_user(username):
+    async def create_new_user(user_id, username):
         '''
         Creates new user entry with default values from config.
         '''
         try:
             now = time.time()
             now = dt.datetime.fromtimestamp(now).strftime("%Y-%m-%d %H:%M:%S")
+
+            # By not updating last_fed_brie_timestamp it inherits the default value defined by the table schema.
             cursor.execute(
-                "INSERT INTO users (username,createdTimestamp,updatedTimestamp,bondLevel,hasFedBrie,lastFedBrieTimestamp,bondsAvailable,happinessLevel) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", 
-                (username,now,now,0,0,0,0,0)
+                "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
+                (username,user_id,0,0,0,0,0,0,1,now,now)
             )
         except mariadb.Error as error:
             log.error("Failed to create new user: %s", error)
