@@ -4,6 +4,7 @@ import time
 import logging
 from streamElements import StreamElementsAPI
 from db import Database as db
+from bonds import BondHandler
 
 log = logging.getLogger("commands")
 epicfilehandler = logging.FileHandler("commands.log")
@@ -264,72 +265,221 @@ class CommandHandler:
         # Check for SP
         pass
 
-    async def cmd_headpat(self, user):
+    async def cmd_headpat(self, user, uid):
         '''
         Head pat bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_scratch(self, user):
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["headpat"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the headpat bonding activity.")
+        else:
+            self.send_message("You gave Brie a headpat.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+
+    async def cmd_scratch(self, user, uid):
         '''
         Scratch bonding activity
+        Requires "scratcher"
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_hug(self, user):
+        has_item = await db.get_has_scratcher(uid)
+        if not has_item:
+            self.send_message(f"You don't have the Scratcher, {user}")
+            raise BrieError("Missing Scratcher.")
+
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["scratch"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the scratch bonding activity.")
+        else:
+            self.send_message("You gave Brie a scratch.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+    async def cmd_hug(self, user, uid):
         '''
         Hug bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_tickle(self, user):
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["hug"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the hug bonding activity.")
+        else:
+            self.send_message("You gave Brie a hug.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+    async def cmd_tickle(self, user, uid):
         '''
         Tickle bonding activity
+        Requires "feather"
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_nuzzle(self, user):
+        has_item = await db.get_has_feather(uid)
+        if not has_item:
+            self.send_message(f"You don't have the Feather, {user}")
+            raise BrieError("Missing Feather.")
+
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["tickle"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the tickle bonding activity.")
+        else:
+            self.send_message("You gave Brie a tickle.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+    async def cmd_nuzzle(self, user, uid):
         '''
         Nuzzle bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_brush(self, user):
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["nuzzle"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the nuzzle bonding activity.")
+        else:
+            self.send_message("You gave Brie a nuzzle.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+    async def cmd_brush(self, user, uid):
         '''
         Brush bonding activity
+        Requires "brush"
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_massage(self, user):
+        has_item = await db.get_has_brush(uid)
+        if not has_item:
+            self.send_message(f"You don't have the Brush, {user}")
+            raise BrieError("Missing Brush.")
+
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["brush"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the brush bonding activity.")
+        else:
+            self.send_message("You gave Brie a brush.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+    async def cmd_massage(self, user, uid):
         '''
         Massage bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_bellyrub(self, user):
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["massage"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the massage bonding activity.")
+        else:
+            self.send_message("You gave Brie a massage.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+    async def cmd_bellyrub(self, user, uid):
         '''
         Belly rub bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_cuddle(self, user):
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["bellyrub"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the belly rub bonding activity.")
+        else:
+            self.send_message("You gave Brie a belly rub.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+    async def cmd_cuddle(self, user, uid):
         '''
         Cuddling bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
 
-    async def cmd_holdhands(self, user):
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["cuddle"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the cuddle bonding activity.")
+        else:
+            self.send_message("You gave Brie a cuddle.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
+
+    async def cmd_holdhands(self, user, uid):
         '''
         Hand holding bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        can_attempt = await db.get_bonds(uid)
+        if can_attempt <= 0:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
+
+        user_aff = await db.get_affection(uid)
+        bond = BondHandler.bond_list["holdhands"]
+        worth = BondHandler.try_bond(user_aff, bond)
+        if worth == 0:
+            self.send_message("You failed the handholding bonding activity.")
+        else:
+            self.send_message("You gave Brie a handhold.")
+            await db.add_bond_level(uid, worth)
+        await db.remove_bonds(uid, 1)
+        return True
