@@ -1,5 +1,7 @@
 import logging as log
-import mysql.connector as mariadb
+import MySQLdb as mariadb
+import time
+import datetime as dt
 
 log.basicConfig(filename='database.log',level=log.DEBUG)
 
@@ -8,7 +10,6 @@ cursor = mariadb_connection.cursor()
 
 # Enable autocommit
 cursor.execute("SET AUTOCOMMIT=1") # https://mariadb.com/resources/blog/every-select-from-your-python-program-may-acquire-a-metadata-lock/
-cursor.commit() # not sure if this is needed.
 
 class Database():
 
@@ -23,9 +24,11 @@ class Database():
         Creates new user entry with default values from config.
         '''
         try:
+            now = time.time()
+            now = dt.datetime.fromtimestamp(now).strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute(
                 "INSERT INTO users (username,createdTimestamp,updatedTimestamp,bondLevel,hasFedBrie,lastFedBrieTimestamp,bondsAvailable,happinessLevel) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", 
-                (username,createdTimestamp,updatedTimestamp,bondLevel,hasFedBrie,lastFedBrieTimestamp,bondsAvailable,happinessLevel)
+                (username,now,now,0,0,0,0,0)
             )
         except mariadb.Error as error:
             log.error("Failed to create new user: %s", error)

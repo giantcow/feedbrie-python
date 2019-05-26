@@ -1,6 +1,8 @@
 import inspect
 import traceback
 import time
+from streamElements import StreamElementsAPI
+from db import Database as db
 
 class NotEnoughArgsError(Exception):
     def __init__(self, num):
@@ -31,6 +33,9 @@ class CommandHandler:
         self.parent = parent
         self.prefix = prefix
 
+        # streamElements api implementation access
+        self.se = StreamElementsAPI(parent.config.SE_ID, parent.config.JWT_ID, parent.loop)
+
         # command aliases. may be scrapped if not needed
         self._aliases = {
             "sd" : "shutdown"
@@ -57,12 +62,15 @@ class CommandHandler:
         else:
             self.parent.connection.privmsg(self.parent.target, msg)
 
-    async def parse_for_command(self, user, message):
+    async def parse_for_command(self, user_tuple, message):
         '''
         Run a function defined within this class that matches the message
         '''
         if not message.startswith(self.prefix):
             return False
+
+        user = user_tuple[0]
+        user_id = user_tuple[1]
 
         message = message[1:] # remove the prefix
         if len(message) == 0: # if it was only a prefix, fail
@@ -87,7 +95,6 @@ class CommandHandler:
                 print("Cooldown failed.")
                 return False
 
-
         parts.pop(0)
         params = inspect.signature(command).parameters.copy()
         kwargs = {}
@@ -101,11 +108,14 @@ class CommandHandler:
 
         # These are function parameters. Put the specific names as a param for it to be sent.
         # user : user name
+        # uid : user ID
         # args : rest of the message split into a list
         # message : rest of the message as a string
         # mention_list : list of user names mentioned by the message
         if params.pop("user", None):
             kwargs["user"] = user
+        if params.pop("uid", None):
+            kwargs["uid"] = user_id
         if params.pop("args", None): # if blank, this is an empty list
             kwargs["args"] = parts
         if params.pop("message", None): # if blank, this is an empty string
@@ -139,7 +149,42 @@ class CommandHandler:
             self.parent.memory_config.save_data()
             print("Saving and quitting IRC...")
             await self.parent.aio_session.close()
+            await self.se.aio_session.close()
             self.parent.connection.quit()
+
+    async def cmd_tu(self, uid):
+        '''
+        test user create
+        '''
+        await db.create_new_user(uid)
+
+    async def cmd_test_getpoints(self, user):
+        '''
+        test get points
+        '''
+        if user != self.parent.host:
+            raise BrieError
+        amount = await self.se.get_user_points(user)
+        self.send_message(f"you have {amount} points")
+
+    async def cmd_test_setpoints(self, user, args, mention_list):
+        '''
+        test set points of 1 user
+        '''
+        if user != self.parent.host:
+            raise BrieError
+        if len(args) < 2:
+            raise NotEnoughArgsError(2 - len(args))
+
+        # try your best to get the person of interest
+        # justification for mention_list: args will not strip the '@' automatically so why not
+        target = mention_list[0] if len(mention_list) != 0 else args[0]
+        try:
+            amount = int(args[1])
+        except:
+            raise BrieError
+        new_amount = await self.se.set_user_points(target, amount)
+        self.send_message(f"set {target} points to {new_amount}")
 
     async def cmd_help(self, user, args):
         '''
