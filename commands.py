@@ -1,8 +1,15 @@
 import inspect
 import traceback
 import time
+import logging
 from streamElements import StreamElementsAPI
 from db import Database as db
+
+log = logging.getLogger("commands")
+epicfilehandler = logging.FileHandler("commands.log")
+epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+log.setLevel(logging.DEBUG)
+log.addHandler(epicfilehandler)
 
 class NotEnoughArgsError(Exception):
     def __init__(self, num):
@@ -92,7 +99,7 @@ class CommandHandler:
         this_cooldown = self.cooldowns[name]
         if user in this_cooldown:
             if this_cooldown[user] > now:
-                print("Cooldown failed.")
+                log.info(f"{user} tried to execute command {name} but the cooldown hasn't ended.")
                 return False
 
         parts.pop(0)
@@ -124,22 +131,30 @@ class CommandHandler:
             kwargs["mention_list"] = mentions
 
         try:
-            await command(**kwargs)
+            result = await command(**kwargs)
             #
             # reach this point if we succeed, do whatever you want here
             # Any fully successful command will set a new cooldown.
             this_cooldown[user] = now + 60.0
+            if result is None or result: # catch commands which dont return anything
+                log.info(f"{user} executed command {name} successfully.")
+            else:
+                log.info(f"{user} attempted to execute command {name} but was denied.")
 
         except SystemExit:
             pass
         except BrieError as e: # Handling all failures
             print(user, "FAILED:", e.message)
         except NotEnoughArgsError as e: # Handling basic missing arg failures
-            print(user, "MISSING ARGS:", e.message)
+            # print(user, "MISSING ARGS:", e.message)
+            log.info(f"{user} failed command {name}: {e.message}")
         except: # Default failures that are probably our fault
+            log.exception(f"{user} tried to execute command {name} but a critical internal error occurred.")
             print(f"Error in command {name}")
             traceback.print_exc()
             print("---\n")
+        finally:
+            return True
 
     async def cmd_shutdown(self, user):
         '''
@@ -151,28 +166,32 @@ class CommandHandler:
             await self.parent.aio_session.close()
             await self.se.aio_session.close()
             self.parent.connection.quit()
+            return True
+        return False
 
-    async def cmd_tu(self, uid):
+    async def cmd_tu(self, user, uid):
         '''
         test user create
         '''
-        await db.create_new_user(uid)
+        await db.create_new_user(user, uid)
+        return True
 
     async def cmd_test_getpoints(self, user):
         '''
         test get points
         '''
         if user != self.parent.host:
-            raise BrieError
+            return False
         amount = await self.se.get_user_points(user)
         self.send_message(f"you have {amount} points")
+        return True
 
     async def cmd_test_setpoints(self, user, args, mention_list):
         '''
         test set points of 1 user
         '''
         if user != self.parent.host:
-            raise BrieError
+            return False
         if len(args) < 2:
             raise NotEnoughArgsError(2 - len(args))
 
@@ -185,6 +204,7 @@ class CommandHandler:
             raise BrieError
         new_amount = await self.se.set_user_points(target, amount)
         self.send_message(f"set {target} points to {new_amount}")
+        return True
 
     async def cmd_help(self, user, args):
         '''

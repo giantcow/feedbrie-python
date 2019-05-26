@@ -1,9 +1,13 @@
-import logging as log
+import logging
 import MySQLdb as mariadb
 import time
 import datetime as dt
 
-log.basicConfig(filename='database.log',level=log.DEBUG)
+log = logging.getLogger("database")
+epicfilehandler = logging.FileHandler("database.log")
+epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+log.setLevel(logging.DEBUG)
+log.addHandler(epicfilehandler)
 
 mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie')
 cursor = mariadb_connection.cursor()
