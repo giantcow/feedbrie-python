@@ -68,9 +68,15 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         Event run for every message sent in the IRC Channel
         '''
         # print(event.source.nick + ": " + event.arguments[0])
-        user = event.source.nick.lower()
+        name = event.source.nick.lower()
         message = event.arguments[0]
+        id = ""
 
+        for d in event.tags: # irc, why did you decide this format was good?
+            if d["key"] == "user-id":
+                id = d["value"]
+
+        user = (name, id)
         self.loop.create_task(
             self.command_handler.parse_for_command(user, message)
         )
