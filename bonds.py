@@ -23,6 +23,7 @@ class BondFailedError(Exception):
 
 class BondLoader:
 
+    @staticmethod
     def load_bonds(path="bonds.json"):
         '''
         Load bonds from a JSON file
@@ -40,6 +41,7 @@ class BondHandler:
 
     bond_list = BondLoader.load_bonds()
 
+    @staticmethod
     def reload_bonds(path="bonds.json"):
         '''
         Reload bonds from disk
@@ -47,6 +49,7 @@ class BondHandler:
         BondHandler.bond_list = BondLoader.load_bonds(path)
         log.info("Reloading bonds from JSON.")
 
+    @staticmethod
     def calculate_success(gate_affection, given_affection, scale_min, scale_max):
         '''
         Calculate a success chance for an event.
@@ -60,6 +63,7 @@ class BondHandler:
         randomval = random.randint(1, 100)
         return percentage >= randomval
 
+    @staticmethod
     async def handle_item(user_id, bond):
         '''
         Check the required item for the given ID and bond
@@ -72,6 +76,7 @@ class BondHandler:
         has_item = await db.get_value(user_id, table_entry)
         return has_item >= 1
 
+    @staticmethod
     async def try_bond(user_id, bond):
         '''
         Get and output the value of a bond after attempting it, given a user's affection and a particular bond dict.
