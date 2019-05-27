@@ -265,9 +265,9 @@ class CommandHandler:
         '''
         Private method to run the process of every bond command so code doesn't repeat over and over
         '''
+        bond = BondHandler.bond_list[bond_name]
         try:
-            bond = BondHandler.bond_list[bond_name]
-            worth = await BondHandler.try_bond(uid, bond)
+            await BondHandler.try_bond(uid, bond)
             self.send_message(f"You succeeded the {bond['name']} activity, {user}")
             return True
         except NoMoreAttemptsError:
