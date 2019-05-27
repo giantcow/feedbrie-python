@@ -38,7 +38,6 @@ class Database():
         else:
             raise InvaludUserIdTypeException(user_id=user_id, reason="Non-string type.")
 
-    @staticmethod
     def __get_table_fields(table):
         fields = []
         try:
