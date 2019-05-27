@@ -5,9 +5,11 @@ import irc.bot
 import irc.client
 import irc.client_aio
 import irc.strings
+import sentry_sdk
 from conf import *
 from commands import CommandHandler
 
+sentry_sdk.init("http://bebaa1aa09624850be6de92149dd763a@localhost/1")
 
 class TheBot(irc.client_aio.AioSimpleIRCClient):
     def __init__(self):
