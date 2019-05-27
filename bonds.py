@@ -1,6 +1,7 @@
 import logging
 import random
 import json
+from db import Database as db
 
 log = logging.getLogger("bonds")
 epicfilehandler = logging.FileHandler("bonds.log")
@@ -8,14 +9,17 @@ epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(mess
 log.setLevel(logging.DEBUG)
 log.addHandler(epicfilehandler)
 
-class Bond:
-    def __init__(self, name, worth, item, gate, scalemin, scalemax):
-        self.name = name
-        self.worth = worth
-        self.item = item
-        self.gate = gate
-        self.min = scalemin
-        self.max = scalemax
+class NoMoreAttemptsError(Exception):
+    def __init__(self):
+        self.message = "Out of Bond attempts."
+
+class MissingItemError(Exception):
+    def __init__(self, item):
+        self.message = f"Missing item: {item}"
+
+class BondFailedError(Exception):
+    def __init__(self):
+        self.message = "Bond failed."
 
 class BondLoader:
 
@@ -56,18 +60,40 @@ class BondHandler:
         randomval = random.randint(1, 100)
         return percentage >= randomval
 
-    def try_bond(user_aff, bond):
+    async def handle_item(user_id, bond):
+        '''
+        Check the required item for the given ID and bond
+        Return true or false depending on success
+        '''
+        if bond["item"] == "":
+            return True
+        item = bond["item"].lower()
+        table_entry = f"has_{item}"
+        has_item = await db.get_value(user_id, table_entry)
+        return has_item >= 1
+
+    async def try_bond(user_id, bond):
         '''
         Get and output the value of a bond after attempting it, given a user's affection and a particular bond dict.
-        Return the worth.
-        Returns 0 if the bond fails.
+        Return True if it passes and modifies the bond level respectively.
+        Raises some exception which describes the problem with the bond attempt otherwise.
         '''
+        can_try = await db.get_value(user_id, "bonds_available")
+        if can_try <= 0:
+            raise NoMoreAttemptsError
+        await db.remove_value(user_id, "bonds_available", 1)
+
+        has_item = await BondHandler.handle_item(user_id, bond)
+        if not has_item:
+            raise MissingItemError(bond["item"])
+
+        user_aff = await db.get_value(user_id, "affection")
         worth = bond["worth"]
         gate = bond["gate_aff"]
         scale_min = bond["scale_min"]
         scale_max = bond["scale_max"]
         success = BondHandler.calculate_success(gate, user_aff, scale_min, scale_max)
         if success:
-            return worth
+            await db.add_value(user_id, "bond_level", worth)
         else:
-            return 0
+            raise BondFailedError
