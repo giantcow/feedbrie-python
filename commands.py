@@ -1,16 +1,24 @@
 import inspect
 import traceback
 import time
+import logging
 from streamElements import StreamElementsAPI
 from db import Database as db
+from bonds import BondHandler, NoMoreAttemptsError, MissingItemError, BondFailedError
+
+log = logging.getLogger("commands")
+epicfilehandler = logging.FileHandler("commands.log")
+epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+log.setLevel(logging.DEBUG)
+log.addHandler(epicfilehandler)
 
 class NotEnoughArgsError(Exception):
     def __init__(self, num):
         self.message = f"Not enough arguments provided. Requires {f'{num} more argument' if num == 1 else f'{num} more arguments'}."
 
 class BrieError(Exception):
-    def __init__(self):
-        self.message = "This is a generic Brie error."
+    def __init__(self, message="This is a generic Brie error."):
+        self.message = message
 
 class NotEnoughSPError(BrieError):
     def __init__(self, has, required):
@@ -19,10 +27,6 @@ class NotEnoughSPError(BrieError):
 class NotEnoughAffectionError(BrieError):
     def __init__(self, has, required):
         self.message = f"Not enough affection. You need {required - has} more."
-
-class MissingItemError(BrieError):
-    def __init__(self, item):
-        self.message = f"You are missing the {item}."
 
 class InvalidEntryError(BrieError):
     def __init__(self, entered):
@@ -92,7 +96,7 @@ class CommandHandler:
         this_cooldown = self.cooldowns[name]
         if user in this_cooldown:
             if this_cooldown[user] > now:
-                print("Cooldown failed.")
+                log.info(f"{user} tried to execute command {name} but the cooldown hasn't ended.")
                 return False
 
         parts.pop(0)
@@ -124,22 +128,31 @@ class CommandHandler:
             kwargs["mention_list"] = mentions
 
         try:
-            await command(**kwargs)
+            result = await command(**kwargs)
             #
             # reach this point if we succeed, do whatever you want here
             # Any fully successful command will set a new cooldown.
             this_cooldown[user] = now + 60.0
+            if result is None or result: # catch commands which dont return anything
+                log.info(f"{user} executed command {name} successfully.")
+            else:
+                log.info(f"{user} attempted to execute command {name} but was denied.")
 
         except SystemExit:
             pass
         except BrieError as e: # Handling all failures
-            print(user, "FAILED:", e.message)
+            # print(user, "FAILED:", e.message)
+            log.info(f"{user} failed command {name}: {e.message}")
         except NotEnoughArgsError as e: # Handling basic missing arg failures
-            print(user, "MISSING ARGS:", e.message)
+            # print(user, "MISSING ARGS:", e.message)
+            log.info(f"{user} failed command {name}: {e.message}")
         except: # Default failures that are probably our fault
+            log.exception(f"{user} tried to execute command {name} but a critical internal error occurred.")
             print(f"Error in command {name}")
             traceback.print_exc()
             print("---\n")
+        finally:
+            return True
 
     async def cmd_shutdown(self, user):
         '''
@@ -151,28 +164,32 @@ class CommandHandler:
             await self.parent.aio_session.close()
             await self.se.aio_session.close()
             self.parent.connection.quit()
+            return True
+        return False
 
-    async def cmd_tu(self, uid):
+    async def cmd_tu(self, user, uid):
         '''
         test user create
         '''
-        await db.create_new_user(uid)
+        await db.create_new_user(uid, user)
+        return True
 
     async def cmd_test_getpoints(self, user):
         '''
         test get points
         '''
         if user != self.parent.host:
-            raise BrieError
+            return False
         amount = await self.se.get_user_points(user)
         self.send_message(f"you have {amount} points")
+        return True
 
     async def cmd_test_setpoints(self, user, args, mention_list):
         '''
         test set points of 1 user
         '''
         if user != self.parent.host:
-            raise BrieError
+            return False
         if len(args) < 2:
             raise NotEnoughArgsError(2 - len(args))
 
@@ -182,9 +199,10 @@ class CommandHandler:
         try:
             amount = int(args[1])
         except:
-            raise BrieError
+            raise BrieError("The second argument given could not be converted to an integer.")
         new_amount = await self.se.set_user_points(target, amount)
         self.send_message(f"set {target} points to {new_amount}")
+        return True
 
     async def cmd_help(self, user, args):
         '''
@@ -243,72 +261,86 @@ class CommandHandler:
         # Check for SP
         pass
 
-    async def cmd_headpat(self, user):
+    async def __bond_command_internal(self, user, uid, bond_name):
+        '''
+        Private method to run the process of every bond command so code doesn't repeat over and over
+        '''
+        try:
+            bond = BondHandler.bond_list[bond_name]
+            worth = await BondHandler.try_bond(uid, bond)
+            self.send_message(f"You succeeded the {bond['name']} activity, {user}")
+            return True
+        except NoMoreAttemptsError:
+            self.send_message(f"You are out of bond attempts, {user}")
+            raise BrieError("Out of bond attempts.")
+        except MissingItemError as e:
+            self.send_message(f"You don't have the {bond['item']}, {user}")
+            raise BrieError(e.message)
+        except BondFailedError:
+            self.send_message(f"You failed the {bond['name']} activity, {user}")
+            return True
+        except:
+            raise
+
+    async def cmd_headpat(self, user, uid):
         '''
         Head pat bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "headpat")
 
-    async def cmd_scratch(self, user):
+    async def cmd_scratch(self, user, uid):
         '''
         Scratch bonding activity
+        Requires "scratcher"
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "scratch")
 
-    async def cmd_hug(self, user):
+    async def cmd_hug(self, user, uid):
         '''
         Hug bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "hug")
 
-    async def cmd_tickle(self, user):
+    async def cmd_tickle(self, user, uid):
         '''
         Tickle bonding activity
+        Requires "feather"
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "tickle")
 
-    async def cmd_nuzzle(self, user):
+    async def cmd_nuzzle(self, user, uid):
         '''
         Nuzzle bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "nuzzle")
 
-    async def cmd_brush(self, user):
+    async def cmd_brush(self, user, uid):
         '''
         Brush bonding activity
+        Requires "brush"
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "brush")
 
-    async def cmd_massage(self, user):
+    async def cmd_massage(self, user, uid):
         '''
         Massage bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "massage")
 
-    async def cmd_bellyrub(self, user):
+    async def cmd_bellyrub(self, user, uid):
         '''
         Belly rub bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "bellyrub")
 
-    async def cmd_cuddle(self, user):
+    async def cmd_cuddle(self, user, uid):
         '''
         Cuddling bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "cuddle")
 
-    async def cmd_holdhands(self, user):
+    async def cmd_holdhands(self, user, uid):
         '''
         Hand holding bonding activity
         '''
-        # Check for item or other requirements based on the user
-        pass
+        return await self.__bond_command_internal(user, uid, "holdhands")

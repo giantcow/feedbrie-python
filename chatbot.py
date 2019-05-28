@@ -1,6 +1,7 @@
 import sys
 import asyncio
 import aiohttp
+import logging
 import irc.bot
 import irc.client
 import irc.client_aio
@@ -9,6 +10,11 @@ import sentry_sdk
 from conf import *
 from commands import CommandHandler
 
+log = logging.getLogger("chatbot")
+epicfilehandler = logging.FileHandler("chatbot.log")
+epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+log.setLevel(logging.DEBUG)
+log.addHandler(epicfilehandler)
 sentry_sdk.init("http://bebaa1aa09624850be6de92149dd763a@localhost/1")
 
 class TheBot(irc.client_aio.AioSimpleIRCClient):
@@ -47,6 +53,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             connection.cap("REQ", ":twitch.tv/commands")
             connection.join(self.target)
             print("Connected to the Server...")
+            log.info("Connected to IRC.")
         else:
             print("Something is wrong and everything is broken (config is probably wrong)")
 
@@ -62,6 +69,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         Event run on disconnecting from IRC
         '''
         # Changed handling in main(). This should work with SystemExit Exception.
+        log.info("Disconnected from IRC.")
         sys.exit(0)
 
     # Sub module dispatcher should be this function (this is the main menu essentially)  
