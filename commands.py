@@ -2,9 +2,11 @@ import inspect
 import traceback
 import time
 import logging
+import random
 from streamElements import StreamElementsAPI
 from db import Database as db
 from bonds import BondHandler, NoMoreAttemptsError, MissingItemError, BondFailedError
+from storefront import StoreHandler, NoItemError, NotEnoughSPError, AlreadyOwnedError, FreeFeedUsed
 
 log = logging.getLogger("commands")
 epicfilehandler = logging.FileHandler("commands.log")
@@ -19,10 +21,6 @@ class NotEnoughArgsError(Exception):
 class BrieError(Exception):
     def __init__(self, message="This is a generic Brie error."):
         self.message = message
-
-class NotEnoughSPError(BrieError):
-    def __init__(self, has, required):
-        self.message = f"Not enough SP. You need {required - has} more."
 
 class NotEnoughAffectionError(BrieError):
     def __init__(self, has, required):
@@ -154,6 +152,14 @@ class CommandHandler:
         finally:
             return True
 
+    def __choose_key(self, *args):
+        '''
+        Returns a random string from a list 
+        of given strings as arguments
+        '''
+        i = random.randint(0, len(args)-1)
+        return args[i]
+
     async def cmd_shutdown(self, user):
         '''
         Close the bot. Host only.
@@ -209,23 +215,28 @@ class CommandHandler:
         Direct Message a user the help guide.
         '''
         # Left args in for specificity on commands for later, if wanted
-        self.send_message("This is a test.")
+        self.send_message("Help guide placeholder")
+        return True
 
     async def cmd_stats(self, user, args):
         '''
         Direct Message a user personal stats.
         '''
         # Left args in for specificity, if wanted
-        pass
+        # TODO: query for necessary user stats
+        self.send_message("stats placeholder", user)
+        return True
 
     async def cmd_bond(self, user, args):
         '''
         Display the bond leaderboard and happiness level.
         '''
         # Left args in for whatever reason
-        pass
+        # TODO: query for users with highest bond
+        self.send_message("leaderboard placeholder")
+        return True
 
-    async def cmd_feed(self, user, args):
+    async def cmd_feed(self, user, uid, args):
         '''
         Feed a purchasable item. SP for the item is required. This helps hunger.
         '''
@@ -233,9 +244,15 @@ class CommandHandler:
             # Help text or a failure can go here
             raise NotEnoughArgsError(1)
 
-        item = args[0]
+        item = args[0].lower()
         # Check for SP requirement
-        pass
+        try:
+            user_sp = self.se.get_user_points(user)
+            cost = await StoreHandler.try_feed(StoreHandler, uid, user_sp, item)
+            await self.se.set_user_points(user, user_sp - cost)
+        except:
+            raise
+        return True
 
     async def cmd_gift(self, user, args):
         '''

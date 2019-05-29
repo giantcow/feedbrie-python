@@ -38,6 +38,7 @@ class Database():
         else:
             raise InvaludUserIdTypeException(user_id=user_id, reason="Non-string type.")
 
+    @staticmethod
     def __get_table_fields(table):
         fields = []
         try:
@@ -105,7 +106,7 @@ class Database():
 
         try:
             Database.user_id_check(index)
-            cursor.execute("SELECT %s FROM users WHERE user_id = %s", (index, val_name))
+            cursor.execute("SELECT %s FROM users WHERE user_id = %s", (val_name, index))
             res = cursor.fetchall()
             return res[0][0]
         except (mariadb.Error, InvaludUserIdTypeException) as error:

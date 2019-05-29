@@ -36,7 +36,6 @@ class BondLoader:
             log.exception("Failed to load Bonds JSON.")
         return data
 
-
 class BondHandler:
 
     bond_list = BondLoader.load_bonds()

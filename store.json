@@ -1,0 +1,199 @@
+{
+"base": {
+    "cracker": {
+        "affection": 1,
+        "cost": 0
+    },
+    "cheddar": {
+        "affection": 2,
+        "cost": 1
+    },
+    "feta": {
+        "affection": 5,
+        "cost": 2
+    },
+    "provolone": {
+        "affection": 8,
+        "cost": 3
+    },
+    "gouda": {
+        "affection": 11,
+        "cost": 4
+    },
+    "swiss": {
+        "affection": 14,
+        "cost": 5
+    },
+    "brie": {
+        "affection": 17,
+        "cost": 6
+    }
+},
+"spring": {
+    "corn": {
+        "affection": 20,
+        "cost": 7
+    },
+    "orange": {
+        "affection": 23,
+        "cost": 8
+    },
+    "apricot": {
+        "affection": 26,
+        "cost": 9
+    },
+    "pineapple": {
+        "affection": 30,
+        "cost": 10
+    },
+    "strawberry": {
+        "affection": 15,
+        "cost": 7,
+        "bond": 1
+    },
+    "mango": {
+        "affection": 19,
+        "cost": 8,
+        "bond": 2
+    },
+    "lychee": {
+        "affection": 22,
+        "cost": 9,
+        "bond": 3
+    },
+    "honeydew": {
+        "affection": 25,
+        "cost": 10,
+        "bond": 4
+    }
+},
+"summer": {
+    "carrot": {
+        "affection": 20,
+        "cost": 7
+    },
+    "cucumber": {
+        "affection": 23,
+        "cost": 8
+    },
+    "apple": {
+        "affection": 26,
+        "cost": 9
+    },
+    "watermelon": {
+        "affection": 30,
+        "cost": 10
+    },
+    "tomato": {
+        "affection": 15,
+        "cost": 7,
+        "bond": 1
+    },
+    "grapes": {
+        "affection": 19,
+        "cost": 8,
+        "bond": 2
+    },
+    "blackberry": {
+        "affection": 22,
+        "cost": 9,
+        "bond": 3
+    },
+    "huckleberry": {
+        "affection": 25,
+        "cost": 10,
+        "bond": 4
+    }
+},
+"fall": {
+    "lettuce": {
+        "affection": 20,
+        "cost": 7
+    },
+    "cranberry": {
+        "affection": 23,
+        "cost": 8
+    },
+    "yam": {
+        "affection": 26,
+        "cost": 9
+    },
+    "pumpkin": {
+        "affection": 30,
+        "cost": 10
+    },
+    "fig": {
+        "affection": 15,
+        "cost": 7,
+        "bond": 1
+    },
+    "quince": {
+        "affection": 19,
+        "cost": 8,
+        "bond": 2
+    },
+    "persimmon": {
+        "affection": 22,
+        "cost": 9,
+        "bond": 3
+    },
+    "pomegranate": {
+        "affection": 25,
+        "cost": 10,
+        "bond": 4
+    }
+},
+"winter": {
+    "kumquat": {
+        "affection": 20,
+        "cost": 7
+    },
+    "bellpepper": {
+        "affection": 23,
+        "cost": 8
+    },
+    "cauliflower": {
+        "affection": 26,
+        "cost": 9
+    },
+    "grapefruit": {
+        "affection": 30,
+        "cost": 10
+    },
+    "kiwi": {
+        "affection": 15,
+        "cost": 7,
+        "bond": 1
+    },
+    "walnut": {
+        "affection": 19,
+        "cost": 8,
+        "bond": 2
+    },
+    "tangerine": {
+        "affection": 22,
+        "cost": 9,
+        "bond": 3
+    },
+    "peanutbutter": {
+        "affection": 25,
+        "cost": 10,
+        "bond": 4
+    }
+},
+"items": {
+    "scratcher":{"cost":2},
+    "feather":{"cost":2},
+    "brush":{"cost":2}
+},
+"gifts": {
+    "puzzle":{
+        "cost": 5,
+        "reward": {
+            "common": 12,
+            "uncommon": 8,
+            "rare": 20
+        }
+    }
+}
+}
