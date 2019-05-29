@@ -30,6 +30,7 @@ class InvaludUserIdTypeException(Exception):
 
 class Database():
 
+    @staticmethod
     def user_id_check(user_id):
         if isinstance(user_id, str):
             if len(user_id) > 100:
@@ -37,6 +38,7 @@ class Database():
         else:
             raise InvaludUserIdTypeException(user_id=user_id, reason="Non-string type.")
 
+    @staticmethod
     def __get_table_fields(table):
         fields = []
         try:
@@ -50,6 +52,7 @@ class Database():
 
     __user_table_fields = __get_table_fields("users")
 
+    @staticmethod
     async def create_new_user(user_id, username):
         '''
         Creates new user entry with default values from config.
@@ -67,6 +70,7 @@ class Database():
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to create new user: %s", error)
 
+    @staticmethod
     async def set_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
@@ -75,7 +79,8 @@ class Database():
             cursor.execute("UPDATE users SET %s = %s WHERE user_id = %s", (val_name, val, index))
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
-    
+
+    @staticmethod
     async def add_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
@@ -85,6 +90,7 @@ class Database():
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
 
+    @staticmethod
     async def remove_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
@@ -94,12 +100,13 @@ class Database():
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
 
+    @staticmethod
     async def get_value(index, val_name):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
         try:
             Database.user_id_check(index)
-            cursor.execute("SELECT %s FROM users WHERE user_id = %s", (index, val_name))
+            cursor.execute("SELECT %s FROM users WHERE user_id = %s", (val_name, index))
             res = cursor.fetchall()
             return res[0][0]
         except (mariadb.Error, InvaludUserIdTypeException) as error:
@@ -111,24 +118,28 @@ class Database():
     #                       #
     #########################
 
+    @staticmethod
     async def get_created_timestamp(user_id):
         '''
         Returns timestamp for when the user entry was created.
         '''
         return await Database.get_value(user_id, "created_at")
 
+    @staticmethod
     async def get_updated_timestamp(user_id):
         '''
         Returns the last time the given User's entry was updated.
         '''
         return await Database.get_value(user_id, "updated_at")
 
+    @staticmethod
     async def set_fed_brie_timestamp(user_id, fed_timestamp=dt.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")):
         '''
         Updates the last time a user has fed Brie.
         '''
         await Database.set_value(user_id, "last_fed_brie_timestamp", fed_timestamp)
 
+    @staticmethod
     async def get_last_fed_timestamp(user_id):
         '''
         Returns timestamp of User's last feeding.
