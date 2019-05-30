@@ -38,14 +38,14 @@ class Database():
         else:
             raise InvaludUserIdTypeException(user_id=user_id, reason="Non-string type.")
 
-    @staticmethod
     def __get_table_fields(table):
+        __sql = "SHOW COLUMNS FROM "+table
         fields = []
         try:
-            cursor.execute("SHOW COLUMNS FROM %s", [table])
+            cursor.execute(__sql)
             res = cursor.fetchall()
             for field in res:
-                field.append(field[0])
+                fields.append(field[0])
             return fields
         except mariadb.Error as error:
             log.error("Failed to get table columns: %s", error)
