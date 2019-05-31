@@ -23,7 +23,7 @@ sentry_sdk.init(
 
 log = logging.getLogger("chatbot")
 epicfilehandler = logging.FileHandler("chatbot.log")
-epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(module)s %(levelname)s %(message)s"))
+epicfilehandler.setFormatter(logging.Formatter("[%(asctime)s] [%(module)s] [%(levelname)s]: %(message)s"))
 log.setLevel(logging.DEBUG)
 log.addHandler(epicfilehandler)
 
