@@ -3,11 +3,7 @@ import MySQLdb as mariadb
 import time
 import datetime as dt
 
-log = logging.getLogger("database")
-epicfilehandler = logging.FileHandler("database.log")
-epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-log.setLevel(logging.DEBUG)
-log.addHandler(epicfilehandler)
+log = logging.getLogger("chatbot")
 
 try:
     mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)

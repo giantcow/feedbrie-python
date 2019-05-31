@@ -3,11 +3,7 @@ import random
 import json
 from db import Database as db
 
-log = logging.getLogger("bonds")
-epicfilehandler = logging.FileHandler("bonds.log")
-epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-log.setLevel(logging.DEBUG)
-log.addHandler(epicfilehandler)
+log = logging.getLogger("chatbot")
 
 class NoMoreAttemptsError(Exception):
     def __init__(self):

@@ -6,16 +6,11 @@ import irc.bot
 import irc.client
 import irc.client_aio
 import irc.strings
+import logging
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 from conf import *
 from commands import CommandHandler
-
-log = logging.getLogger("chatbot")
-epicfilehandler = logging.FileHandler("chatbot.log")
-epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-log.setLevel(logging.DEBUG)
-log.addHandler(epicfilehandler)
 
 sentry_logging = LoggingIntegration(
     level=logging.DEBUG, 
@@ -26,6 +21,12 @@ sentry_sdk.init(
     integrations=[sentry_logging]
 )
 
+log = logging.getLogger("chatbot")
+epicfilehandler = logging.FileHandler("chatbot.log")
+epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(module)s %(levelname)s %(message)s"))
+log.setLevel(logging.DEBUG)
+log.addHandler(epicfilehandler)
+
 class TheBot(irc.client_aio.AioSimpleIRCClient):
     def __init__(self):
         irc.client.SimpleIRCClient.__init__(self)
@@ -34,6 +35,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.channel_name = self.config.CHANNEL_NAME    # The display name of the twitch channel
         self.channel_id = ""                            # ID is saved as a string because JSON sends it that way
         self.host = self.config.HOST                    # The name of the host of the bot
+        self.log = logging.getLogger("chatbot")         # Centralized logging
         
         # for twitch api stuff
         self.aio_session = None
