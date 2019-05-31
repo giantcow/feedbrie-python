@@ -26,6 +26,7 @@ epicfilehandler = logging.FileHandler("chatbot.log")
 epicfilehandler.setFormatter(logging.Formatter("[%(asctime)s] [%(module)s] [%(levelname)s]: %(message)s"))
 log.setLevel(logging.DEBUG)
 log.addHandler(epicfilehandler)
+log.addHandler(logging.StreamHandler(sys.stdout))
 
 class TheBot(irc.client_aio.AioSimpleIRCClient):
     def __init__(self):
