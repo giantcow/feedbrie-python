@@ -165,7 +165,6 @@ class CommandHandler:
         Close the bot. Host only.
         '''
         if user == self.parent.host:
-            self.parent.memory_config.save_data()
             print("Saving and quitting IRC...")
             await self.parent.aio_session.close()
             await self.se.aio_session.close()

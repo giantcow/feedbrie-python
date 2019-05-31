@@ -20,9 +20,7 @@ sentry_sdk.init("http://bebaa1aa09624850be6de92149dd763a@localhost/1")
 class TheBot(irc.client_aio.AioSimpleIRCClient):
     def __init__(self):
         irc.client.SimpleIRCClient.__init__(self)
-        self.config = Conf(os.path.dirname(os.path.realpath(__file__))+"\\config.ini")
-        self.memory_config = CSVMemory(os.path.dirname(os.path.realpath(__file__))+"\\memory.csv")
-        self.memory = self.memory_config.persistentDict
+        self.config = Conf(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.ini"))
         self.target = "#" + self.config.CHANNEL_NAME    # The name of the twitch irc channel
         self.channel_name = self.config.CHANNEL_NAME    # The display name of the twitch channel
         self.channel_id = ""                            # ID is saved as a string because JSON sends it that way
@@ -62,7 +60,6 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         Event run on entrance to the IRC Channel
         '''
         print("WE IN, BOYS")
-        self.loop.create_task(self.saving_loop())
 
     def on_disconnect(self, connection, event):
         '''
@@ -77,7 +74,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         Event run for every message sent in the IRC Channel
         '''
-        # print(event.source.nick + ": " + event.arguments[0])
+        log.info(event.source.nick + ": " + event.arguments[0])
         name = event.source.nick.lower()
         message = event.arguments[0]
         id = ""
@@ -90,14 +87,6 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.loop.create_task(
             self.command_handler.parse_for_command(user, message)
         )
-
-    async def saving_loop(self): # is there a better way to do this?
-        '''
-        An async loop to save the memory to disk every 30 seconds
-        '''
-        while True:
-            await asyncio.sleep(30)
-            self.memory_config.save_data()
 
     async def get_channel_id_by_name(self, specific_login = None):
         '''
@@ -139,13 +128,13 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
 
             return len(json_response["data"]) != 0
             
-    async def send_is_live(self):
-        '''
-        Send the is_live status to chat
-        '''
-        # i got bored and wanted to see if this was possible on one line
-        output = f"{self.channel_name} is {'' if await self.is_live() else 'not '}live"
-        self.connection.privmsg(self.target, output)
+#    async def send_is_live(self):
+#        '''
+#        Send the is_live status to chat
+#        '''
+#        # i got bored and wanted to see if this was possible on one line
+#        output = f"{self.channel_name} is {'' if await self.is_live() else 'not '}live"
+#        self.connection.privmsg(self.target, output)
 
     async def is_mod(self, user, channel_id = None):
         '''
@@ -171,12 +160,12 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
                     return True
             return False
 
-    async def send_is_mod(self, user):
-        '''
-        Send the is_mod status of a user to chat
-        '''
-        # round 2 of bored one liners
-        self.connection.privmsg(self.target, f"{user} is {'' if await self.is_mod(user) else 'not '}a mod")
+#    async def send_is_mod(self, user):
+#        '''
+#        Send the is_mod status of a user to chat
+#        '''
+#        # round 2 of bored one liners
+#        self.connection.privmsg(self.target, f"{user} is {'' if await self.is_mod(user) else 'not '}a mod")
 
 def main():
     '''
@@ -194,5 +183,7 @@ def main():
     finally:
         bot.connection.disconnect()
         bot.reactor.loop.close()
+
 if __name__ == "__main__":
     main()
+
