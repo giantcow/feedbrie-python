@@ -71,10 +71,10 @@ class StoreHandler:
         reward = self.store_list["gifts"][item]["reward"]
         rand = random.randint(1,100)
         if 0 < rand <= com:
-            return reward["common"]
+            return {"type": "common", "value": reward["common"]}
         elif com < rand <= com + unc:
-            return reward["uncommon"]
-        return reward["rare"]
+            return {"type": "uncommon", "value": reward["uncommon"]}
+        return {"type": "rare", "value": reward["rare"]}
 
     @staticmethod
     async def try_feed(self, user_id, user_sp, item):
@@ -124,7 +124,8 @@ class StoreHandler:
     async def try_gift(self, user_id, user_sp, item):
         '''
         Gives Brie a gift and randomly gives the user 
-        an amount of affection points
+        an amount of affection points. Returns the cost 
+        and reward type.
         '''
         gifts = self.store_list["gifts"]
         try_gift = gifts.get(item, "None")
@@ -133,5 +134,5 @@ class StoreHandler:
         if user_sp < try_gift["cost"]:
             raise NotEnoughSPError
         reward = self.gamble_puzzle(item, 60, 30)
-        await db.set_value(user_id, "affection", reward)
-        return try_gift["cost"]
+        await db.set_value(user_id, "affection", reward["value"])
+        return {"cost": try_gift["cost"], "reward": reward["type"]}
