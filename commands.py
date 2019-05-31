@@ -1,18 +1,12 @@
 import inspect
 import traceback
 import time
-import logging
 import random
+import logging
 from streamElements import StreamElementsAPI
 from db import Database as db
 from bonds import BondHandler, NoMoreAttemptsError, MissingItemError, BondFailedError
 from storefront import StoreHandler, NoItemError, NotEnoughSPError, AlreadyOwnedError, FreeFeedUsed
-
-log = logging.getLogger("commands")
-epicfilehandler = logging.FileHandler("commands.log")
-epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-log.setLevel(logging.DEBUG)
-log.addHandler(epicfilehandler)
 
 class NotEnoughArgsError(Exception):
     def __init__(self, num):
@@ -32,6 +26,7 @@ class InvalidEntryError(BrieError):
 
 class CommandHandler:
     def __init__(self, parent, prefix):
+        log = logging.getLogger("chatbot")
         self.parent = parent
         self.prefix = prefix
 
