@@ -85,7 +85,6 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         Event run for every message sent in the IRC Channel
         '''
-        log.info(event.source.nick + ": " + event.arguments[0])
         name = event.source.nick.lower()
         message = event.arguments[0]
         id = ""
