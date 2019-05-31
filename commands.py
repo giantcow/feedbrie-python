@@ -73,7 +73,7 @@ class CommandHandler:
         if len(message) == 0: # if it was only a prefix, fail
             return False
 
-        self.log.info(user + "("+user_id+"): " + message)
+        self.log.info(user + " ("+user_id+"): " + message)
 
         parts = message.split()
         name = parts[0]
