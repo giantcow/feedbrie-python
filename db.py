@@ -9,7 +9,12 @@ epicfilehandler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(mess
 log.setLevel(logging.DEBUG)
 log.addHandler(epicfilehandler)
 
-mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
+try:
+    mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
+except mariadb.Error as error:
+    log.error("Failed to connect to the MariaDB server: %s", error)
+    raise
+
 cursor = mariadb_connection.cursor()
 
 class DatabaseException(Exception):
@@ -49,6 +54,7 @@ class Database():
             return fields
         except mariadb.Error as error:
             log.error("Failed to get table columns: %s", error)
+            raise
 
     __user_table_fields = __get_table_fields("users")
 
@@ -69,6 +75,7 @@ class Database():
             )
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to create new user: %s", error)
+            raise
 
     @staticmethod
     async def set_value(index, val_name, val):
@@ -79,6 +86,7 @@ class Database():
             cursor.execute("UPDATE users SET %s = %s WHERE user_id = %s", (val_name, val, index))
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
+            raise
 
     @staticmethod
     async def add_value(index, val_name, val):
@@ -89,6 +97,7 @@ class Database():
             cursor.execute("UPDATE users SET %s = %s + %s WHERE user_id = %s", (val_name, val_name, val, index))
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
+            raise
 
     @staticmethod
     async def remove_value(index, val_name, val):
@@ -99,6 +108,7 @@ class Database():
             cursor.execute("UPDATE users SET %s = %s - %s WHERE user_id = %s", (val_name, val_name, val, index))
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
+            raise
 
     @staticmethod
     async def get_value(index, val_name):
@@ -111,6 +121,7 @@ class Database():
             return res[0][0]
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to get %s for user_id: %s \n %s" % (val_name, index, error))
+            raise
 
     #########################
     #                       #
