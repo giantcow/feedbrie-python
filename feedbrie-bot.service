@@ -1,0 +1,14 @@
+[Unit]
+Description=FeedBrie Twitch bot for BobberWCC
+After=network.target
+
+[Service]
+User=kayo
+Group=kayo
+
+WorkingDirectory=/home/kayo/workspace/feedbrie
+Environment="PATH=/home/kayo/workspace/feedbrie/Scripts"
+ExecStart=/usr/bin/python3.7 /home/kayo/workspace/feedbrie/chatbot.py
+
+[Install]
+WantedBy=multi-user.target
