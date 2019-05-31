@@ -26,7 +26,7 @@ class InvalidEntryError(BrieError):
 
 class CommandHandler:
     def __init__(self, parent, prefix):
-        log = logging.getLogger("chatbot")
+        self.log = logging.getLogger("chatbot")
         self.parent = parent
         self.prefix = prefix
 
@@ -89,7 +89,7 @@ class CommandHandler:
         this_cooldown = self.cooldowns[name]
         if user in this_cooldown:
             if this_cooldown[user] > now:
-                log.info(f"{user} tried to execute command {name} but the cooldown hasn't ended.")
+                self.log.info(f"{user} tried to execute command {name} but the cooldown hasn't ended.")
                 return False
 
         parts.pop(0)
@@ -127,20 +127,20 @@ class CommandHandler:
             # Any fully successful command will set a new cooldown.
             this_cooldown[user] = now + 60.0
             if result is None or result: # catch commands which dont return anything
-                log.info(f"{user} executed command {name} successfully.")
+                self.log.info(f"{user} executed command {name} successfully.")
             else:
-                log.info(f"{user} attempted to execute command {name} but was denied.")
+                self.log.info(f"{user} attempted to execute command {name} but was denied.")
 
         except SystemExit:
             pass
         except BrieError as e: # Handling all failures
             # print(user, "FAILED:", e.message)
-            log.info(f"{user} failed command {name}: {e.message}")
+            self.log.info(f"{user} failed command {name}: {e.message}")
         except NotEnoughArgsError as e: # Handling basic missing arg failures
             # print(user, "MISSING ARGS:", e.message)
-            log.info(f"{user} failed command {name}: {e.message}")
+            self.log.info(f"{user} failed command {name}: {e.message}")
         except: # Default failures that are probably our fault
-            log.exception(f"{user} tried to execute command {name} but a critical internal error occurred.")
+            self.log.exception(f"{user} tried to execute command {name} but a critical internal error occurred.")
             print(f"Error in command {name}")
             traceback.print_exc()
             print("---\n")
