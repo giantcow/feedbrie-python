@@ -77,9 +77,11 @@ class Database():
     async def set_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
+        __sql = "UPDATE users SET "+val_name+" = "+val+" WHERE user_id = "+index
+
         try:
             Database.user_id_check(index)
-            cursor.execute("UPDATE users SET %s = %s WHERE user_id = %s", (val_name, val, index))
+            cursor.execute(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
             raise
@@ -88,9 +90,11 @@ class Database():
     async def add_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
+        __sql = "UPDATE users SET "+val_name+" = "+val_name+" + "+val+" WHERE user_id = "+index
+
         try:
             Database.user_id_check(index)
-            cursor.execute("UPDATE users SET %s = %s + %s WHERE user_id = %s", (val_name, val_name, val, index))
+            cursor.execute(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
             raise
@@ -99,9 +103,11 @@ class Database():
     async def remove_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
+        __sql = "UPDATE users SET "+val_name+" = "+val_name+" - "+val+" WHERE user_id = "+index
+
         try:
             Database.user_id_check(index)
-            cursor.execute("UPDATE users SET %s = %s - %s WHERE user_id = %s", (val_name, val_name, val, index))
+            cursor.execute(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
             raise
@@ -110,9 +116,11 @@ class Database():
     async def get_value(index, val_name):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
+        __sql = "SELECT "+val_name+" FROM users WHERE user_id = "+index
+
         try:
             Database.user_id_check(index)
-            cursor.execute("SELECT %s FROM users WHERE user_id = %s", (val_name, index))
+            cursor.execute(__sql)
             res = cursor.fetchall()
             return res[0][0]
         except (mariadb.Error, InvaludUserIdTypeException) as error:
