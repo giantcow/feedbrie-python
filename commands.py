@@ -245,7 +245,17 @@ class CommandHandler:
         try:
             user_sp = self.se.get_user_points(user)
             cost = await StoreHandler.try_feed(StoreHandler, uid, user_sp, item)
-            await self.se.set_user_points(user, user_sp - cost)
+            await self.se.set_user_points(user, -cost)
+            self.send_message(f"Placeholder text for {item}")
+        except NoItemError as e:
+            self.send_message("NoItemError placeholder text.")
+            raise BrieError(e.message)
+        except NotEnoughSPError as e:
+            self.send_message("NotEnoughSPError placeholder text.")
+            raise BrieError(e.message)
+        except FreeFeedUsed as e:
+            self.send_message("FreeFeedUsed placeholder text.")
+            raise BrieError(e.message)
         except:
             raise
         return True
@@ -260,7 +270,20 @@ class CommandHandler:
 
         item = args[0]
         # Check for SP requirement
-        pass
+        try:
+            user_sp = self.se.get_user_points(user)
+            puzzle = await StoreHandler.try_gift(StoreHandler, uid, user_sp, item)
+            await self.se.set_user_points(user, -puzzle["cost"])
+            self.send_message(f"Placeholder text for {puzzle['reward']}")
+        except NoItemError as e:
+            self.send_message("NoItemError placeholder text.")
+            raise BrieError(e.message)
+        except NotEnoughSPError as e:
+            self.send_message("NotEnoughSPError placeholder text.")
+            raise BrieError(e.message)
+        except:
+            raise
+        return True
 
     async def cmd_buy(self, user, args):
         '''
@@ -272,7 +295,23 @@ class CommandHandler:
 
         item = args[0]
         # Check for SP
-        pass
+        try:
+            user_sp = self.se.get_user_points(user)
+            cost = await StoreHandler.try_buy(StoreHandler, uid, user_sp, item)
+            await self.se.set_user_points(user, -cost)
+            self.send_message(f"Placeholder text for {item}")
+        except NoItemError as e:
+            self.send_message("NoItemError placeholder text.")
+            raise BrieError(e.message)
+        except NotEnoughSPError as e:
+            self.send_message("NotEnoughSPError placeholder text.")
+            raise BrieError(e.message)
+        except AlreadyOwnedError as e:
+            self.send_message("AlreadyOwnedError placeholder text.")
+            raise BrieError(e.message)
+        except:
+            raise
+        return True
 
     async def __bond_command_internal(self, user, uid, bond_name):
         '''
