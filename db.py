@@ -3,6 +3,7 @@ import MySQLdb as mariadb
 import time
 import datetime as dt
 import schedule
+import asyncio
 
 log = logging.getLogger("chatbot")
 
@@ -164,7 +165,6 @@ class Database():
         '''
         return await Database.get_value(user_id, "last_fed_brie_timestamp")
 
-@staticmethod
 async def do_decay():
     __sql = """
             UPDATE users 
@@ -190,7 +190,6 @@ async def do_decay():
     except (mariadb.Error) as error:
         log.error("Failed to decay affection and bond_level values! %s" % error)
 
-@staticmethod
 async def do_calc_happiness():
 
     happiness = old_happiness = await Database.get_value(BRIES_ID, "bond_level")
@@ -215,9 +214,5 @@ async def do_calc_happiness():
     await Database.set_value(BRIES_ID, "bond_level", happiness)
     log.info("Recalculated happiness! OLD: %s NEW: %s" % (old_happiness, happiness))
 
-schedule.every().day.at("04:00").do(do_decay)
-schedule.every().day.at("04:05").do(do_calc_happiness)
-
-while 1:
-    schedule.run_pending()
-    time.sleep(1)
+schedule.every().day.at("04:00").do(asyncio.create_task, do_decay)
+schedule.every().day.at("04:05").do(asyncio.create_task, do_calc_happiness)
