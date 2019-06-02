@@ -3,8 +3,6 @@ import MySQLdb as mariadb
 import time
 import datetime as dt
 import schedule
-import threading
-import Queue
 
 log = logging.getLogger("chatbot")
 
@@ -217,20 +215,8 @@ async def __do_calc_happiness():
     await Database.set_value(BRIES_ID, "bond_level", happiness)
     log.info("Recalculated happiness! OLD: %s NEW: %s" % (old_happiness, happiness))
 
-@staticmethod
-def __schedule_worker_main():
-    while 1:
-        __job_to_do = __job_queue.get()
-        __job_to_do()
-        __job_queue.task_done()
-
-__job_queue = Queue.Queue()
-
-schedule.every().day.at("4:00").do(__job_queue, __do_decay)
-schedule.every().day.at("4:00").do(__job_queue, __do_calc_happiness)
-
-__schedule_worker = threading.Thread(target=__schedule_worker_main)
-__schedule_worker.start()
+schedule.every().day.at("04:00").do(__do_decay)
+schedule.every().day.at("04:05").do(__do_calc_happiness)
 
 while 1:
     schedule.run_pending()
