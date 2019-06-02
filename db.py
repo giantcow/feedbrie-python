@@ -165,7 +165,7 @@ class Database():
         return await Database.get_value(user_id, "last_fed_brie_timestamp")
 
 @staticmethod
-async def __do_decay():
+async def do_decay():
     __sql = """
             UPDATE users 
             SET free_feed = 0,
@@ -191,7 +191,7 @@ async def __do_decay():
         log.error("Failed to decay affection and bond_level values! %s" % error)
 
 @staticmethod
-async def __do_calc_happiness():
+async def do_calc_happiness():
 
     happiness = old_happiness = await Database.get_value(BRIES_ID, "bond_level")
 
@@ -215,8 +215,8 @@ async def __do_calc_happiness():
     await Database.set_value(BRIES_ID, "bond_level", happiness)
     log.info("Recalculated happiness! OLD: %s NEW: %s" % (old_happiness, happiness))
 
-schedule.every().day.at("04:00").do(__do_decay)
-schedule.every().day.at("04:05").do(__do_calc_happiness)
+schedule.every().day.at("04:00").do(do_decay)
+schedule.every().day.at("04:05").do(do_calc_happiness)
 
 while 1:
     schedule.run_pending()
