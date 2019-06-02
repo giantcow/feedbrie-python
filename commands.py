@@ -38,6 +38,8 @@ class CommandHandler:
             "sd" : "shutdown"
         }
 
+        self.allow_online = False
+
         # command cooldown dict
         # keys are command names, values are dicts
         #   keys of that dict are usernames, values are a timestamp
@@ -83,6 +85,12 @@ class CommandHandler:
         # Trying to find the command function via the name determined above
         command = getattr(self, f"cmd_{name}", None)
         if command is None:
+            return False
+
+        # Check if the channel is online.
+        # We want this bot to deny all commands if the bot is online.
+        if self.parent.live and not self.allow_online:
+            self.log.info(f"{user} tried to execute command {name} but the channel is online.")
             return False
 
         # Check for cooldown timestamp failure
@@ -166,6 +174,17 @@ class CommandHandler:
             await self.parent.aio_session.close()
             await self.se.aio_session.close()
             self.parent.connection.quit()
+            return True
+        return False
+
+    async def cmd_toggleonline(self, user, uid):
+        '''
+        Toggle the requirement for the bot to be online from chat.
+        Mod only.
+        '''
+        if await self.parent.is_mod(user_id=uid):
+            self.allow_online = not self.allow_online
+            self.send_message("Listening while streaming!" if self.allow_online else "No longer listening while streaming.")
             return True
         return False
 

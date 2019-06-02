@@ -47,11 +47,30 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         # we have to get the aiosession in an async way because deprecated methods
         self.loop.create_task(self.set_aio())
 
+        # loop every once in a while to check if channel is live
+        self.loop.create_task(self.is_live_loop())
+        self.live = False
+
         # command handler stuff
         self.command_handler = CommandHandler(self, self.config.PREFIX)
         
     async def set_aio(self):
         self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID, "Authorization": "Bearer %s" % self.config.JWT_ID, "User-Agent": "Brie/0.1 (+https://brie.everything.moe/)"})
+
+    async def is_live_loop(self):
+        '''
+        Loop every 30 seconds and try to see if the defined channel is live.
+        '''
+        while True:
+            await asyncio.sleep(30)
+            if self.channel_id == "" or self.aio_session is None:
+                continue
+            try:
+                status = await self.is_live()
+                self.live = status
+            except:
+                log.exception(f"An exception occurred while updating the Live Status for {self.channel_id}")
+
 
     def on_welcome(self, connection, event):
         '''
