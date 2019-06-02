@@ -135,7 +135,7 @@ class CommandHandler:
             #
             # reach this point if we succeed, do whatever you want here
             # Any fully successful command will set a new cooldown.
-            this_cooldown[user] = now + 60.0
+            this_cooldown[user] = now + 30.0
             if result is None or result: # catch commands which dont return anything
                 self.log.info(f"{user} executed command {name} successfully.")
             else:
