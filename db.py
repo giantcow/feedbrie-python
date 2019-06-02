@@ -5,6 +5,8 @@ import datetime as dt
 
 log = logging.getLogger("chatbot")
 
+BRIES_ID = 436478155
+
 try:
     mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
 except mariadb.Error as error:
@@ -186,3 +188,28 @@ class Database():
             log.info("Decayed affection and bond_level values in the database! Result: %s" % res)
         except (mariadb.Error) as error:
             log.error("Failed to decay affection and bond_level values! %s" % error)
+
+    @staticmethod
+    async def do_calc_happiness():
+
+        happiness = old_happiness = await Database.get_value(BRIES_ID, "bond_level")
+
+        try:
+            dict_cursor = mariadb_connection.cursor(mariadb.cursors.DictCursor)
+        except (mariadb.Error) as error:
+            log.error("Failed to get DictCursor while calculating Brie's Happiness value: %s" % error)
+            return
+
+        __sql = "SELECT bond_level FROM users WHERE user_id != "+BRIES_ID
+
+        results = dict_cursor.fetchall()
+
+        for res in results:
+            bond_level = int(res["bond_level"])
+            if bond_level > 100:
+                happiness += 100
+            else:
+                happiness += bond_level
+
+        await Database.set_value(BRIES_ID, "bond_level", happiness)
+        log.info("Recalculated happiness! OLD: %s NEW: %s" % (old_happiness, happiness))
