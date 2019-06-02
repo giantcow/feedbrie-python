@@ -99,6 +99,28 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             self.command_handler.parse_for_command(user, message)
         )
 
+    async def wait_for_request_window(self, url):
+        '''
+        sometimes we can get rate limited. wait for the rate limit window by doing this.
+        also retry every 1 second on other errors (but only up to 30 times)
+        '''
+        attempt = True
+        output = {}
+        retries = 0
+        while attempt and retries < 30:
+            async with self.aio_session.get(url) as response:
+                output = await response.json()
+                if "status" in output:
+                    log.warning(f"Got status {output['status']} error while requesting on {url}.")
+                    if output["status"] == 429:
+                        await asyncio.sleep(15)
+                    else:
+                        await asyncio.sleep(1)
+                    retries += 1
+                else:
+                    attempt = False
+        return output
+
     async def get_channel_id_by_name(self, specific_login = None):
         '''
         Use new twitch api to get a channel id by login name
@@ -107,18 +129,16 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         if specific_login is None:
             specific_login = self.channel_name
 
-        async with self.aio_session.get("https://api.twitch.tv/helix/users?login=" + specific_login) as response:
-            # this provides either a result or nothing
-            # nothing is returned if the channel name doesnt exist
-            # and by nothing I mean response.json() appears as {"data": [ ], "pagination": [ ]}
-            json_response = await response.json()
-            channel_id = ""
-            try:
-                channel_id = json_response["data"][0]["id"]
-            except:
-                # this would fail if data was empty (it usually isnt)
-                print("Channel ID retrieval via login name failed.")
-            return channel_id
+        url = f"https://api.twitch.tv/helix/users?login={specific_login}"
+        json_response = await self.wait_for_request_window(url)
+        channel_id = ""
+        try:
+            channel_id = json_response["data"][0]["id"]
+        except:
+            # this would fail if data was empty (it usually isnt)
+            print("Channel ID retrieval via login name failed.")
+            log.warning(f"Channel ID retrieval for login {specific_login} failed.")
+        return channel_id
         
     async def is_live(self, channel_id = None):
         '''
@@ -132,27 +152,18 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         elif channel_id is None:
             channel_id = self.channel_id
 
-        async with self.aio_session.get("https://api.twitch.tv/helix/streams?user_id=" + channel_id) as response:
-            # and this provides nothing (in the payload format) if the channel is offline
-            # i dont know why but that's how twitch works
-            json_response = await response.json()
+        # empty returns from the streams api endpoint mean the channel is offline
+        url = f"https://api.twitch.tv/helix/streams?user_id={channel_id}"
+        json_response = await self.wait_for_request_window(url)
+        return len(json_response["data"]) != 0
 
-            return len(json_response["data"]) != 0
-            
-#    async def send_is_live(self):
-#        '''
-#        Send the is_live status to chat
-#        '''
-#        # i got bored and wanted to see if this was possible on one line
-#        output = f"{self.channel_name} is {'' if await self.is_live() else 'not '}live"
-#        self.connection.privmsg(self.target, output)
-
-    async def is_mod(self, user, channel_id = None):
+    async def is_mod(self, user_name = None, channel_id = None, user_id = None):
         '''
         Use a dank undocumented v5 twitch api method to find the mod badge
         But also use the new twitch api because IRC doesnt tell us the user id
         '''
-        user_id = await self.get_channel_id_by_name(specific_login=user)
+        if user_id is None:
+            user_id = await self.get_channel_id_by_name(specific_login=user_name)
         # fallback to main channel ID if none is specified
         if self.channel_id == "" and channel_id is None:
             self.channel_id = await self.get_channel_id_by_name()
@@ -160,23 +171,16 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         elif channel_id is None:
             channel_id = self.channel_id
 
-        async with self.aio_session.get(f"https://api.twitch.tv/kraken/users/{user_id}/chat/channels/{channel_id}?api_version=5") as response:
-            # the response on api v5, is simply { ... : ... } with lists or dicts optionally embedded
-            # it seems to always exist as far as i can tell
-            json_response = await response.json()
+        url = f"https://api.twitch.tv/kraken/users/{user_id}/chat/channels/{channel_id}?api_version=5"
+        # the response on api v5, is simply { ... : ... } with lists or dicts optionally embedded
+        # it seems to always exist as far as i can tell
+        json_response = await self.wait_for_request_window(url)
 
-            badges = json_response.get("badges", [])
-            for entry in badges:
-                if entry["id"] in ("moderator", "broadcaster"):
-                    return True
-            return False
-
-#    async def send_is_mod(self, user):
-#        '''
-#        Send the is_mod status of a user to chat
-#        '''
-#        # round 2 of bored one liners
-#        self.connection.privmsg(self.target, f"{user} is {'' if await self.is_mod(user) else 'not '}a mod")
+        badges = json_response.get("badges", [])
+        for entry in badges:
+            if entry["id"] in ("moderator", "broadcaster"):
+                return True
+        return False
 
 def main():
     '''
