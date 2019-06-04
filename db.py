@@ -167,7 +167,6 @@ class Database():
 
 scheduler = AsyncIOScheduler()
 
-@scheduler.scheduled_job('interval', id='test1', seconds=3)
 async def do_decay():
     __sql = f"""
             UPDATE users 
@@ -223,5 +222,7 @@ async def do_calc_happiness():
 
     await Database.set_value(BRIES_ID, "bond_level", happiness)
     log.info(f"Recalculated happiness! OLD: {old_happiness} NEW: {happiness}")
+    
+    await do_decay()
 
 scheduler.start()
