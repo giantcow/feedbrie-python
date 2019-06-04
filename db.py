@@ -198,8 +198,10 @@ async def do_decay():
 
 @scheduler.scheduled_job('interval', id='test2', seconds=3)
 async def do_calc_happiness():
-
-    happiness = old_happiness = await Database.get_value(BRIES_ID, "bond_level")
+    
+    happiness = 0
+    
+    old_happiness = await Database.get_value(BRIES_ID, "bond_level")
 
     try:
         dict_cursor = mariadb_connection.cursor(mariadb.cursors.DictCursor)
