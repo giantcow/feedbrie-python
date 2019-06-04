@@ -3,11 +3,11 @@ import MySQLdb as mariadb
 import time
 import datetime as dt
 from threading import Thread
-from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 log = logging.getLogger("chatbot")
 
-BRIES_ID = 436478155
+BRIES_ID = "436478155"
 
 try:
     mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
@@ -165,9 +165,9 @@ class Database():
         '''
         return await Database.get_value(user_id, "last_fed_brie_timestamp")
 
-scheduler = BlockingScheduler()
+scheduler = AsyncIOScheduler()
 
-@scheduler.scheduled_job('cron', hour=4)
+@scheduler.scheduled_job('interval', id='test1', seconds=3)
 async def do_decay():
     __sql = """
             UPDATE users 
@@ -189,11 +189,11 @@ async def do_decay():
     try:
         cursor.execute(__sql)
         res = cursor.fetchall()
-        log.info("Decayed affection and bond_level values in the database! Result: %s" % res)
+        log.info("Decayed affection and bond_level values in the database!")
     except (mariadb.Error) as error:
         log.error("Failed to decay affection and bond_level values! %s" % error)
 
-@scheduler.scheduled_job('cron', hour=4, minute=5)
+@scheduler.scheduled_job('interval', id='test2', seconds=3)
 async def do_calc_happiness():
 
     happiness = old_happiness = await Database.get_value(BRIES_ID, "bond_level")
@@ -217,8 +217,5 @@ async def do_calc_happiness():
 
     await Database.set_value(BRIES_ID, "bond_level", happiness)
     log.info("Recalculated happiness! OLD: %s NEW: %s" % (old_happiness, happiness))
-def start_scheduling():
-    scheduler.start()
 
-scheduler_thread = Thread(target=start_scheduling)
-scheduler_thread.start()
+scheduler.start()
