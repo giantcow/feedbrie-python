@@ -239,7 +239,7 @@ class CommandHandler:
         '''
         # Left args in for specificity, if wanted
         # TODO: query for necessary user stats
-        self.send_message("stats placeholder", user)
+        self.send_message("stats placeholder")
         return True
 
     async def cmd_bond(self, user, args):
