@@ -175,15 +175,17 @@ async def do_decay():
                 bonds_available = 0, 
                 affection = 
                     CASE 
-                        WHEN last_fed_brie_timestamp >= NOW() + INTERVAL 1 DAY AND affection > 5 THEN affection - 5
-                        WHEN last_fed_brie_timestamp >= NOW() + INTERVAL 1 DAY AND affection < 5 THEN 0
-                        ELSE affection - 1
+                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection > 5 THEN affection - 5
+                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection > 1 THEN affection - 1
+                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
+                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
                     END,
                 bond_level = 
                     CASE 
-                        WHEN last_fed_brie_timestamp >= NOW() + INTERVAL 1 DAY AND bond_level > 0 THEN bond_level - 5
-                        WHEN last_fed_brie_timestamp >= NOW() + INTERVAL 1 DAY AND bond_level < 5 THEN 0
-                        ELSE bond_level - 1
+                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level > 5 THEN bond_level - 5
+                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level > 1 THEN bond_level - 1
+                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
+                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
                     END
             WHERE user_id != {BRIES_ID};
             """
