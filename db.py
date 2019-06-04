@@ -208,7 +208,8 @@ async def do_calc_happiness():
         return
 
     __sql = f"SELECT bond_level FROM users WHERE user_id != {BRIES_ID}"
-
+    
+    dict_cursor.execute(__sql)
     results = dict_cursor.fetchall()
 
     for res in results:
