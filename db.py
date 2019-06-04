@@ -169,7 +169,7 @@ scheduler = AsyncIOScheduler()
 
 @scheduler.scheduled_job('interval', id='test1', seconds=3)
 async def do_decay():
-    __sql = """
+    __sql = f"""
             UPDATE users 
             SET free_feed = 0,
                 bonds_available = 0, 
@@ -184,7 +184,8 @@ async def do_decay():
                         WHEN last_fed_brie_timestamp >= NOW() + INTERVAL 1 DAY AND bond_level > 0 THEN bond_level - 5
                         WHEN last_fed_brie_timestamp >= NOW() + INTERVAL 1 DAY AND bond_level < 5 THEN 0
                         ELSE bond_level - 1
-                    END;
+                    END
+            WHERE user_id != {BRIES_ID};
             """
     try:
         cursor.execute(__sql)
