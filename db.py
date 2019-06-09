@@ -131,6 +131,21 @@ class Database():
             log.error(f"Failed to get {val_name} for user_id: {index} \n {error}")
             raise
 
+    @staticmethod
+    async def get_column(val_name):
+        if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
+
+        __sql = f"SELECT {val_name} FROM users"
+
+        try:
+            cursor.execute(__sql)
+            res = cursor.fetchall()
+            out = [data[0] for data in res]
+            return out
+        except (mariadb.Error, InvaludUserIdTypeException) as error:
+            log.error(f"Failed to get {val_name} column \n {error}")
+            raise
+
     #########################
     #                       #
     #       Helpers         #
