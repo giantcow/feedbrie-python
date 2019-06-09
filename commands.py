@@ -45,6 +45,11 @@ class CommandHandler:
         #   keys of that dict are usernames, values are a timestamp
         self.cooldowns = {f[4:] : {} for f in dir(self) if f[:4] == "cmd_"}
 
+        # db cache for user accounts
+        # simply a set of all user ids
+        self.existing_users = set()
+        parent.create_task(self.reload_existing_users())
+
     # To check for mod powers:
     # is_mod = await self.parent.is_mod(username)
 
@@ -60,6 +65,14 @@ class CommandHandler:
             self.parent.connection.privmsg(recipient, msg)
         else:
             self.parent.connection.privmsg(self.parent.target, msg)
+
+    async def reload_existing_users(self):
+        '''
+        Reset the cached list of users available.
+        This is just to reduce the need for repeatedly pinging the db to see if a user exists.
+        '''
+        result = await db.get_column("user_id")
+        self.existing_users = set(result)
 
     async def parse_for_command(self, user_tuple, message):
         '''
@@ -101,6 +114,15 @@ class CommandHandler:
             if this_cooldown[user] > now:
                 self.log.info(f"{user} tried to execute command {name} but the cooldown hasn't ended.")
                 return False
+
+        # Check to see that the user has info stored in the db for the game
+        # The first check is to the cache.
+        # If the check fails, update the list and check. If this fails, make a new entry.
+        if user_id not in self.existing_users:
+            await self.reload_existing_users()
+            if user_id not in self.existing_users:
+                self.log.info(f"Creating new user table entry for {name} ({user_id})")
+                await db.create_new_user(user_id, user)
 
         parts.pop(0)
         params = inspect.signature(command).parameters.copy()
