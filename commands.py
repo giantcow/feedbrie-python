@@ -123,6 +123,7 @@ class CommandHandler:
             if user_id not in self.existing_users:
                 self.log.info(f"Creating new user table entry for {name} ({user_id})")
                 await db.create_new_user(user_id, user)
+                self.existing_users.add(user_id)
 
         parts.pop(0)
         params = inspect.signature(command).parameters.copy()
