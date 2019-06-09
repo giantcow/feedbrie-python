@@ -2,13 +2,17 @@ import logging
 import MySQLdb as mariadb
 import time
 import datetime as dt
+from threading import Thread
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 log = logging.getLogger("chatbot")
+
+BRIES_ID = "436478155"
 
 try:
     mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
 except mariadb.Error as error:
-    log.error("Failed to connect to the MariaDB server: %s", error)
+    log.error(f"Failed to connect to the MariaDB server: {error}")
     raise
 
 cursor = mariadb_connection.cursor()
@@ -40,7 +44,7 @@ class Database():
             raise InvaludUserIdTypeException(user_id=user_id, reason="Non-string type.")
 
     def __get_table_fields(table):
-        __sql = "SHOW COLUMNS FROM "+table
+        __sql = f"SHOW COLUMNS FROM {table}"
         fields = []
         try:
             cursor.execute(__sql)
@@ -49,7 +53,7 @@ class Database():
                 fields.append(field[0])
             return fields
         except mariadb.Error as error:
-            log.error("Failed to get table columns: %s", error)
+            log.error(f"Failed to get table columns: {error}")
             raise
 
     __user_table_fields = __get_table_fields("users")
@@ -70,53 +74,53 @@ class Database():
                 (username,user_id,0,0,0,0,0,0,1,now,now)
             )
         except (mariadb.Error, InvaludUserIdTypeException) as error:
-            log.error("Failed to create new user: %s", error)
+            log.error(f"Failed to create new user: {error}")
             raise
 
     @staticmethod
     async def set_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
-        __sql = "UPDATE users SET "+val_name+" = "+val+" WHERE user_id = "+index
+        __sql = f"UPDATE users SET {val_name} = {val} WHERE user_id = {index}"
 
         try:
             Database.user_id_check(index)
             cursor.execute(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
-            log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
+            log.error(f"Failed to set {val_name} to {val} for user_id: {index} \n {error}")
             raise
 
     @staticmethod
     async def add_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
-        __sql = "UPDATE users SET "+val_name+" = "+val_name+" + "+val+" WHERE user_id = "+index
+        __sql = f"UPDATE users SET {val_name} = {val_name} + {val} WHERE user_id = {index}"
 
         try:
             Database.user_id_check(index)
             cursor.execute(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
-            log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
+            log.error(f"Failed to set {val_name} to {val} for user_id: {index} \n {error}")
             raise
 
     @staticmethod
     async def remove_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
-        __sql = "UPDATE users SET "+val_name+" = "+val_name+" - "+val+" WHERE user_id = "+index
+        __sql = f"UPDATE users SET {val_name} = {val_name} - {val} WHERE user_id = {index}"
 
         try:
             Database.user_id_check(index)
             cursor.execute(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
-            log.error("Failed to set %s to %s for user_id: %s \n %s" % (val_name, val, index, error))
+            log.error(f"Failed to set {val_name} to {val} for user_id: {index} \n {error}")
             raise
 
     @staticmethod
     async def get_value(index, val_name):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
-        __sql = "SELECT "+val_name+" FROM users WHERE user_id = "+index
+        __sql = f"SELECT {val_name} FROM users WHERE user_id = {index}"
 
         try:
             Database.user_id_check(index)
@@ -124,7 +128,7 @@ class Database():
             res = cursor.fetchall()
             return res[0][0]
         except (mariadb.Error, InvaludUserIdTypeException) as error:
-            log.error("Failed to get %s for user_id: %s \n %s" % (val_name, index, error))
+            log.error(f"Failed to get {val_name} for user_id: {index} \n {error}")
             raise
 
     #########################
@@ -160,3 +164,65 @@ class Database():
         Returns timestamp of User's last feeding.
         '''
         return await Database.get_value(user_id, "last_fed_brie_timestamp")
+
+scheduler = AsyncIOScheduler()
+
+async def do_decay():
+    __sql = f"""
+            UPDATE users 
+            SET free_feed = 0,
+                bonds_available = 0, 
+                affection = 
+                    CASE 
+                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection > 5 THEN affection - 5
+                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection > 1 THEN affection - 1
+                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
+                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
+                    END,
+                bond_level = 
+                    CASE 
+                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level > 5 THEN bond_level - 5
+                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level > 1 THEN bond_level - 1
+                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
+                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
+                    END
+            WHERE user_id != {BRIES_ID};
+            """
+    try:
+        cursor.execute(__sql)
+        res = cursor.fetchall()
+        log.info("Decayed affection and bond_level values in the database!")
+    except (mariadb.Error) as error:
+        log.error(f"Failed to decay affection and bond_level values! {error}")
+
+@scheduler.scheduled_job('interval', id='test2', seconds=3)
+async def do_calc_happiness():
+    
+    happiness = 0
+    
+    old_happiness = await Database.get_value(BRIES_ID, "bond_level")
+
+    try:
+        dict_cursor = mariadb_connection.cursor(mariadb.cursors.DictCursor)
+    except (mariadb.Error) as error:
+        log.error(f"Failed to get DictCursor while calculating Brie's Happiness value: {error}")
+        return
+
+    __sql = f"SELECT bond_level FROM users WHERE user_id != {BRIES_ID}"
+    
+    dict_cursor.execute(__sql)
+    results = dict_cursor.fetchall()
+
+    for res in results:
+        bond_level = int(res["bond_level"])
+        if bond_level > 100:
+            happiness += 100
+        else:
+            happiness += bond_level
+
+    await Database.set_value(BRIES_ID, "bond_level", happiness)
+    log.info(f"Recalculated happiness! OLD: {old_happiness} NEW: {happiness}")
+    
+    await do_decay()
+
+scheduler.start()
