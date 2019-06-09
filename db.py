@@ -180,6 +180,15 @@ class Database():
         '''
         return await Database.get_value(user_id, "last_fed_brie_timestamp")
 
+    @staticmethod
+    async def get_brie_happiness():
+        '''
+        Returns the current level of happiness for Brie.
+        '''
+        output = await Database.get_value(BRIES_ID, "bond_level")
+        # perhaps should do some formula to keep this on a 0-100 scale?
+        return output
+
 scheduler = AsyncIOScheduler()
 
 async def do_decay():
