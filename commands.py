@@ -48,7 +48,7 @@ class CommandHandler:
         # db cache for user accounts
         # simply a set of all user ids
         self.existing_users = set()
-        parent.create_task(self.reload_existing_users())
+        parent.loop.create_task(self.reload_existing_users())
 
     # To check for mod powers:
     # is_mod = await self.parent.is_mod(username)
@@ -72,6 +72,8 @@ class CommandHandler:
         This is just to reduce the need for repeatedly pinging the db to see if a user exists.
         '''
         result = await db.get_column("user_id")
+        for i in range(len(result)):
+            result[i] = str(result[i])
         self.existing_users = set(result)
 
     async def parse_for_command(self, user_tuple, message):
@@ -121,7 +123,7 @@ class CommandHandler:
         if user_id not in self.existing_users:
             await self.reload_existing_users()
             if user_id not in self.existing_users:
-                self.log.info(f"Creating new user table entry for {name} ({user_id})")
+                self.log.info(f"Creating new user table entry for {user} ({user_id})")
                 await db.create_new_user(user_id, user)
                 self.existing_users.add(user_id)
 
