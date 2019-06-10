@@ -41,6 +41,7 @@ class StoreLoader:
         return data
 
 class StoreHandler:
+
     store_list = StoreLoader.load_store()
 
     @staticmethod
@@ -63,12 +64,12 @@ class StoreHandler:
         log.info("Reloading store from JSON.")
     
     @staticmethod
-    def gamble_puzzle(self, item, com, unc):
+    def gamble_puzzle(item, com, unc):
         '''
         Takes odds for common, uncommon, and rare(implicit) win
         and outputs appropriate AP to reward
         '''
-        reward = self.store_list["gifts"][item]["reward"]
+        reward = StoreHandler.store_list["gifts"][item]["reward"]
         rand = random.randint(1,100)
         if 0 < rand <= com:
             return {"type": "common", "value": reward["common"]}
@@ -77,16 +78,17 @@ class StoreHandler:
         return {"type": "rare", "value": reward["rare"]}
 
     @staticmethod
-    async def try_feed(self, user_id, user_sp, item):
+    async def try_feed(user_id, user_sp, item):
         '''
         Checks if item exists and user has enough SP, 
         then sells and feeds the food item to Brie, 
         updating user db with new affection value, 
         and finally returns cost of food to subtract
         '''
-        seasonal_list = dict(self.store_list["base"], self.store_list[self.__get_season()])
-        try_food = seasonal_list.get(item, "None")
-        if try_food == "None":
+        season = StoreHandler.__get_season()
+        seasonal_list = {**StoreHandler.store_list["base"], **StoreHandler.store_list[season]}
+        try_food = seasonal_list.get(item, None)
+        if try_food is None:
             raise NoItemError
         if user_sp < try_food["cost"]:
             raise NotEnoughSPError
@@ -104,11 +106,11 @@ class StoreHandler:
             return try_food["cost"]
 
     @staticmethod
-    async def try_buy(self, user_id, user_sp, item):
+    async def try_buy(user_id, user_sp, item):
         '''
         Unlocks a permanent item if the user has enough SP
         '''
-        perma_items = self.store_list["items"]
+        perma_items = StoreHandler.store_list["items"]
         try_item = perma_items.get(item, "None")
         if try_item == "None":
             raise NoItemError
@@ -121,18 +123,18 @@ class StoreHandler:
         return try_item["cost"]
 
     @staticmethod
-    async def try_gift(self, user_id, user_sp, item):
+    async def try_gift(user_id, user_sp, item):
         '''
         Gives Brie a gift and randomly gives the user 
         an amount of affection points. Returns the cost 
         and reward type.
         '''
-        gifts = self.store_list["gifts"]
+        gifts = StoreHandler.store_list["gifts"]
         try_gift = gifts.get(item, "None")
         if try_gift == "None":
             raise NoItemError
         if user_sp < try_gift["cost"]:
             raise NotEnoughSPError
-        reward = self.gamble_puzzle(item, 60, 30)
+        reward = StoreHandler.gamble_puzzle(item, 60, 30)
         await db.set_value(user_id, "affection", reward["value"])
         return {"cost": try_gift["cost"], "reward": reward["type"]}
