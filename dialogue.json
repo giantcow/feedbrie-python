@@ -188,6 +188,13 @@
     "nosp": "Squeak. (You don't have enough Student Points to buy that.)",
     "cantbuy": "Squeak. (You can't buy that!)"
 },
+"gifts": {
+	"puzzle": {
+		"common": "Squeak. (Thanks for the gift.)",
+		"uncommon": "Squeak! (Thanks for the gift!)",
+		"rare": "Squeak squeak! (Wow! This is amazing, thanks!)"
+	}
+},
 "bonding": {
     "headpat": {
         "success": [
