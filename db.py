@@ -171,7 +171,7 @@ class Database():
         '''
         Updates the last time a user has fed Brie.
         '''
-        await Database.set_value(user_id, "last_fed_brie_timestamp", fed_timestamp)
+        await Database.set_value(user_id, "last_fed_brie_timestamp", f"'{fed_timestamp}'")
 
     @staticmethod
     async def get_last_fed_timestamp(user_id):
