@@ -70,6 +70,8 @@ class CommandHandler:
         Simple wrapper to send a message.
         If a recipient is given, it needs to be in the format of a user name only. That will send a DM.
         '''
+        if msg == "" or msg is None:
+            msg = "."
         if recipient is not None:
             self.parent.connection.privmsg(recipient, msg)
         else:
