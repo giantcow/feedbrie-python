@@ -3,6 +3,7 @@ import traceback
 import time
 import random
 import logging
+import json
 from streamElements import StreamElementsAPI
 from db import Database as db
 from bonds import BondHandler, NoMoreAttemptsError, MissingItemError, BondFailedError
@@ -29,6 +30,14 @@ class CommandHandler:
         self.log = logging.getLogger("chatbot")
         self.parent = parent
         self.prefix = prefix
+        self.dialogue = {}
+
+        path = "dialogue.json"
+        try:
+            with open(path) as f:
+                self.dialogue = json.load(f)
+        except:
+            self.log.exception("Failed to load dialogue JSON.")
 
         # streamElements api implementation access
         self.se = StreamElementsAPI(parent.config.SE_ID, parent.config.JWT_ID, parent.loop)
@@ -182,13 +191,13 @@ class CommandHandler:
         finally:
             return True
 
-    def __choose_key(self, *args):
+    def __choose_line(self, arr):
         '''
         Returns a random string from a list 
-        of given strings as arguments
+        of given strings
         '''
-        i = random.randint(0, len(args)-1)
-        return args[i]
+        i = random.randint(0, len(arr)-1)
+        return arr[i]
 
     async def cmd_shutdown(self, user):
         '''
@@ -290,7 +299,7 @@ class CommandHandler:
             user_sp = self.se.get_user_points(user)
             cost = await StoreHandler.try_feed(StoreHandler, uid, user_sp, item)
             await self.se.set_user_points(user, -cost)
-            self.send_message(f"Placeholder text for {item}")
+            self.send_message(__choose_line(self.dialogue["food"][item]))
         except NoItemError as e:
             self.send_message("NoItemError placeholder text.")
             raise BrieError(e.message)
