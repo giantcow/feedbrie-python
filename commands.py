@@ -299,23 +299,23 @@ class CommandHandler:
         # Check for SP requirement
         try:
             user_sp = await self.se.get_user_points(user)
-            cost = await StoreHandler.try_feed(StoreHandler, uid, user_sp, item)
+            cost = await StoreHandler.try_feed(uid, user_sp, item)
             await self.se.set_user_points(user, -cost)
-            self.send_message(__choose_line(self.dialogue["food"][item]))
+            self.send_message(self.__choose_line(self.dialogue["food"][item]))
         except NoItemError as e:
-            self.send_message("NoItemError placeholder text.")
+            self.send_message(self.dialogue["info"]["cantbuy"])
             raise BrieError(e.message)
         except NotEnoughSPError as e:
-            self.send_message("NotEnoughSPError placeholder text.")
+            self.send_message(self.dialogue["info"]["nosp"])
             raise BrieError(e.message)
         except FreeFeedUsed as e:
-            self.send_message("FreeFeedUsed placeholder text.")
+            self.send_message(self.dialogue["info"]["nofreefeed"])
             raise BrieError(e.message)
         except:
             raise
         return True
 
-    async def cmd_gift(self, user, args):
+    async def cmd_gift(self, user, uid, args):
         '''
         Gift a purchasable item. SP for the item is required. This gains affection.
         '''
@@ -327,20 +327,20 @@ class CommandHandler:
         # Check for SP requirement
         try:
             user_sp = await self.se.get_user_points(user)
-            puzzle = await StoreHandler.try_gift(StoreHandler, uid, user_sp, item)
+            puzzle = await StoreHandler.try_gift(uid, user_sp, item)
             await self.se.set_user_points(user, -puzzle["cost"])
-            self.send_message(f"Placeholder text for {puzzle['reward']}")
+            self.send_message(self.dialogue["gifts"]["puzzle"][puzzle["reward"]])
         except NoItemError as e:
-            self.send_message("NoItemError placeholder text.")
+            self.send_message(self.dialogue["info"]["cantbuy"])
             raise BrieError(e.message)
         except NotEnoughSPError as e:
-            self.send_message("NotEnoughSPError placeholder text.")
+            self.send_message(self.dialogue["info"]["nosp"])
             raise BrieError(e.message)
         except:
             raise
         return True
 
-    async def cmd_buy(self, user, args):
+    async def cmd_buy(self, user, uid, args):
         '''
         Buy an item, associated with a specific bonding activity permanently.
         '''
@@ -352,17 +352,17 @@ class CommandHandler:
         # Check for SP
         try:
             user_sp = await self.se.get_user_points(user)
-            cost = await StoreHandler.try_buy(StoreHandler, uid, user_sp, item)
+            cost = await StoreHandler.try_buy(uid, user_sp, item)
             await self.se.set_user_points(user, -cost)
-            self.send_message(f"Placeholder text for {item}")
+            self.send_message(f"Squeak! (Here's your {item})!")
         except NoItemError as e:
-            self.send_message("NoItemError placeholder text.")
+            self.send_message(self.dialogue["info"]["cantbuy"])
             raise BrieError(e.message)
         except NotEnoughSPError as e:
-            self.send_message("NotEnoughSPError placeholder text.")
+            self.send_message(self.dialogue["info"]["nosp"])
             raise BrieError(e.message)
         except AlreadyOwnedError as e:
-            self.send_message("AlreadyOwnedError placeholder text.")
+            self.send_message("Squeak! (You already own that!)")
             raise BrieError(e.message)
         except:
             raise
@@ -375,16 +375,16 @@ class CommandHandler:
         bond = BondHandler.bond_list[bond_name]
         try:
             await BondHandler.try_bond(uid, bond)
-            self.send_message(f"You succeeded the {bond['name']} activity, {user}")
+            self.send_message(self.__choose_line(self.dialogue["bonding"][bond_name]["success"]))
             return True
         except NoMoreAttemptsError:
-            self.send_message(f"You are out of bond attempts, {user}")
+            self.send_message("Squeak. (No more. Feed me instead, please.)")
             raise BrieError("Out of bond attempts.")
         except MissingItemError as e:
-            self.send_message(f"You don't have the {bond['item']}, {user}")
+            self.send_message(self.dialogue["info"][f"no{bond['item']}"])
             raise BrieError(e.message)
         except BondFailedError:
-            self.send_message(f"You failed the {bond['name']} activity, {user}")
+            self.send_message(self.__choose_line(self.dialogue["bonding"][bond_name]["failure"]))
             return True
         except:
             raise
