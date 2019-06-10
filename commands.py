@@ -298,7 +298,7 @@ class CommandHandler:
         item = args[0].lower()
         # Check for SP requirement
         try:
-            user_sp = self.se.get_user_points(user)
+            user_sp = await self.se.get_user_points(user)
             cost = await StoreHandler.try_feed(StoreHandler, uid, user_sp, item)
             await self.se.set_user_points(user, -cost)
             self.send_message(__choose_line(self.dialogue["food"][item]))
@@ -326,7 +326,7 @@ class CommandHandler:
         item = args[0]
         # Check for SP requirement
         try:
-            user_sp = self.se.get_user_points(user)
+            user_sp = await self.se.get_user_points(user)
             puzzle = await StoreHandler.try_gift(StoreHandler, uid, user_sp, item)
             await self.se.set_user_points(user, -puzzle["cost"])
             self.send_message(f"Placeholder text for {puzzle['reward']}")
@@ -351,7 +351,7 @@ class CommandHandler:
         item = args[0]
         # Check for SP
         try:
-            user_sp = self.se.get_user_points(user)
+            user_sp = await self.se.get_user_points(user)
             cost = await StoreHandler.try_buy(StoreHandler, uid, user_sp, item)
             await self.se.set_user_points(user, -cost)
             self.send_message(f"Placeholder text for {item}")
