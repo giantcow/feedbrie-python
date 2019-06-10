@@ -1,0 +1,272 @@
+{
+"food": {
+    "cracker": [
+        "Squeak! (Crunchy!)",
+        "Squeak! (Thanks!)",
+        "Squeak! (A lil' dry but thanks!)"
+    ],
+    "cheddar": [
+        "Squeak! (Yum!)",
+        "Squeak! (Thank you!)",
+        "Squeak! (Mmm, I love the sharp taste!)",
+        "Squeak squeak squeak! (Cheddar! A classic! Yum!)",
+        "Squeak squeak! (Cheddar comes in so many forms. This tastes great!)",
+        "Squeak! (Thanks for the cheese!)"
+    ],
+    "feta": [
+        "Squeak! (Yum!)",
+        "Squeak! (Thank you!)",
+        "Squeak! (Mmm, so soft!)",
+        "Squeak squeak! (White cheese! Yummy!)",
+        "Squeak! (This smells good AND tastes good!)",
+        "Squeak squeak squeak! (Feta! Sweet crumbly cheese made from sheep’s milk. Tasty!)"
+    ],
+    "provolone": [
+        "Squeak! (Yum!)",
+        "Squeak! (Thank you!)",
+        "Squeak! (Ooh, so sharp!)",
+        "Squeak! (Smooth to the touch and yummy!)",
+        "Squeak squeak! (A smooth cheese made from cow’s milk. Very delicious!)",
+        "Squeak squeak squeak! (Oh. For me? Thank you!)"
+    ],
+    "gouda": [
+        "Squeak! (Yum!)",
+        "Squeak! (Thank you!)",
+        "Squeak squeak! (Old gouda is very sweet! Mmm, yummy!)",
+        "Squeak squeak! (Yellow cheese! Tasty!)",
+        "Squeak squeak! (Smoked gouda? Yes please!)"
+    ],
+    "swiss": [
+        "Squeak! (Yum!)",
+        "Squeak! (Thank you!)",
+        "Squeak… squeak. (You think I like Swiss cheese just because I’m a mouse, don’cha? Well… you’re right.)",
+        "Squeak squeak squeak! (Those holes! That must be swiss! Yum!)",
+        "Squeak squeak! (I could smell that from miles away. Time to eat!)",
+        "Squeak! (Oh, this is gonna be delicious!)"
+    ],
+    "brie": [
+        "Squeak! (Yum!)",
+        "Squeak! (Thank you!)",
+        "Squeak! (So soft, mmm, so soft!)",
+        "Squeak squeak squeak! (For me? This is so special! Thank you!)",
+        "Squeak squeak! (This smell… Brie cheese! Gimme gimme!)",
+        "Squeak squeak! (You can eat the rind too! So yummy!)",
+        "Squeak squeak! (So rich and creamy. My favorite cheese!)",
+        "Squeak! (They must have named this cheese after me because it’s the best!)"
+    ],
+    "corn": [
+        "Squeak squeak! (Corn on the cob! Time to eat left to right!)",
+        "Squeak squeak! (There are so many types of corn! It’s so fun to eat!)",
+        "Squeak squeak. (Some of my friends feast on corn every night! They live near a farm.)"
+    ],
+    "orange": [
+        "Squeak! (Citrus fruits are a joy to eat!)",
+        "Squeak squeak! (Careful not to eat the seeds! Mmm, so juicy!)"
+    ],
+    "apricot": [
+        "Squeak! (Soft, orange, and sweet!)",
+        "Squeak? (Did you know you can crack open the seed and eat the inside as a palate cleanser?)"
+    ],
+    "pineapple": [
+        "Squeak squeak! (What a big feast! Thank you so much!)",
+        "Squeak squeak squeak! (All of this just for me? Want to share? Yummy!)",
+        "Squeak squeak! (Pineapples have a texture like none other. So tasty!)"
+    ],
+    "strawberry": [
+        "Squeak squeak squeak! (Small, soft, and red! Hmm, sounds familiar. Time to eat!)",
+        "Squeak! (I love nibbling on these!)"
+    ],
+    "mango": [
+        "Squeak squeak! (I used to not like Mangos, but now the texture feels great! Yum!)",
+        "Squeak squeak! (Now this’ll be a tasty treat. Thank you!)"
+    ],
+    "lychee": [
+        "Squeak squeak! (Hard on the outside, but soft on the inside. I loved eating these since as long as I can remember!)",
+        "Squeak squeak squeak! (Looks like a spiky strawberry! But this is more special. Yum!)",
+        "Squeak squeak! (Such a big seed inside. Very little to eat but very tasty!)"
+    ],
+    "honeydew": [
+        "Squeak squeak squeak! (Yum! I can munch on this for a while! Thank you so much!)",
+        "Squeak squeak! (Tough to get into, but so rewarding. Yummy!)"
+    ],
+    "carrot": [
+        "Squeak squeak squeak! (I wonder if Miss Bobber eats enough carrots. She does wear glasses after all. I should share some of mine with her to help improve her seeing!)",
+        "Squeak squeak! (Whether boiled, broiled, or baked, a carrot is always a wonderful treat! Of course there's no going wrong with an uncooked one, it gives off such a satisfying crunch!)"
+    ],
+    "cucumber": [
+        "Squeak squeak! (Have you ever tried cucumber topped with honey? It's almost as sweet as you for giving me so many tasty foods!)",
+        "Squeak squeak squeak squeak! (I saw a cucumber in the ocean once on a field trip! Miss Bobber told me to stay away from it. I had no idea they grew in the ocean though! What an interesting food!)"
+    ],
+    "apple": [
+        "Squeak squeak! (Sour green apples make my teeth tingle, but I love a sweet red apple! Don’t tell Miss Bobber, but honey crisp is my favorite!)",
+        "Squeak squeak! (The louder the crunch is, the sweeter the apple will be! Let’s see how crunchy this one is!)"
+    ],
+    "watermelon": [
+        "Squeak! (What a great way to cool down on a hot summer day!)",
+        "Squeak squeak! (I love nibbling all the way down to the rine! Of course the juicy red part is better, but there's something satisfying about nibbling at the green part too!)"
+    ],
+    "tomato": [
+        "Squeak squeak! (I know people who take a bite out of tomatoes like they're an apple or pear! I prefer to eat them sliced up though!)",
+        "Squeak squeak! (A classmate tried to explain to me that tomatoes are a fruit, but I can't quite understand. They grow from the ground like a vegetable!)"
+    ],
+    "grapes": [
+        "Squeak squeak! (These are tiny water balloons! It’s a pop of juice and flavor with every bite!)",
+        "placeholder"
+    ],
+    "blackberry": [
+        "Squeak squeak! (Oh! I thought these weren't made anymore now that smartphones are so widely produced!)",
+        "placeholder"
+    ],
+    "huckleberry": [
+        ""
+    ],
+    "lettuce": [
+        "Squeak! (Lettuce is really just a salad ball when you think about it!)",
+        "Squeak squeak! (Whenever I get taken to the store and the sprinkler system sprays the lettuce, they sparkle like a disco ball! Someone should hang them up so the supermarket can be more lively!)"
+    ],
+    "cranberry": [
+        ""
+    ],
+    "yam": [
+        ""
+    ],
+    "pumpkin": [
+        ""
+    ],
+    "fig": [
+        ""
+    ],
+    "quince": [
+        ""
+    ],
+    "persimmon": [
+        ""
+    ],
+    "pomegranate": [
+        ""
+    ],
+    "kumquat": [
+        "Squeak squeak squeak! (Some people say if you find a kumquat, the momma orange isn’t far away! Who are the people that say that? Farmers, probably!)",
+        "Squeak squeak! (I like to eat these with their peel on! See, no mess!)"
+    ],
+    "bellpepper": [
+        "Squeak squeak! (I was worried it would be too hot for my tongue, but it’s not spicy at all! I’m amazed!)",
+        "Squeak squeak! (Wow, so many colors to choose from! Who knew a food could look so different but taste the same!)"
+    ],
+    "cauliflower": [
+        "Squeak! (It’s so fluffy at the top like I’m holding a cloud umbrella!)",
+        "Squeak! (Hmm, it doesn’t have much of a taste, but I can’t get enough of it!)"
+    ],
+    "grapefruit": [
+        "Squeak squeak! (This is much larger than any grape I’ve had before! A lot more orange too!)",
+        "Squeak! (Mmm, so sweet, yet so bitter!)"
+    ],
+    "kiwi": [
+        "Squeak squeak! (It’s so fuzzy on the outside! It feels just like the fur on my ears!)",
+        "Squeak! (They smell and taste sweet once you cut it open!)",
+        "Squeak squeak! (I love using a spoon to scoop out the green part! It’s like I’m eating ice cream from a cup!)"
+    ],
+    "walnut": [
+        "Squeak squeak! (The shell is like nature’s shipping box! It’s hand delivering tasty nuts to me safely and securely, no postage necessary!)",
+        "Squeak! (These taste great when lightly salted!)"
+    ],
+    "tangerine": [
+        "Squeak! (I love how each slice is like a big smile that I can chomp into!)",
+        "Squeak squeak? (Peeling the skin off has always been the hardest part of eating this fruit! Why can’t I just eat it whole?)"
+    ],
+    "peanutbutter": [
+        "Squeak! (Ish shticking to the top of my mouth!)",
+        "Squeak squeak!? (I don’t understand how they turn peanuts into peanut butter. Wait, they do WHAT to them!?)"
+    ]
+},
+"info": {
+    "nofood": "Squeak. (That food doesn’t look like it’s in season.)",
+    "nobrush": "Squeak. (You might need a brush for that.)",
+    "noscratcher": "Squeak. (I think the Student Store sells scratchers.)",
+    "nofeather": "Squeak. (You should check the Student Store for feathers.)",
+    "nosp": "Squeak. (You don’t have enough Student Points to buy that.)",
+    "cantbuy": "Squeak. (You can't buy that!)"
+},
+"bonding": {
+    "headpat": {
+        "success": [
+            "Squeak! (Hehe, I love how much attention you’re giving me!)"
+        ],
+        "failure": [
+            "Squeak squeak? (Please don’t mess up my hair like that! I have an image to uphold for the class, you know?)"
+        ]
+    },
+    "scratch": {
+        "success": [
+            "Squeak squeak! (Oh yeah, that feels great! Please scratch behind my ears too!)"
+        ],
+        "failure": [
+            "Squeak squeak? (Eep! Sorry, I’m very sensitive to being scratched, could you give me some more food first?)"
+        ]
+    },
+    "hug": {
+        "success": [
+            "Squeak squeak! (I love your hugs! They’re so warm and comforting!)"
+        ],
+        "failure": [
+            "Squeak. (Oof, please don’t hug me so tight.)"
+        ]
+    },
+    "tickle": {
+        "success": [
+            "Squeak squeak squeak~! (Ah! Hehehe, under my chin is really ticklish! Haha~!)"
+        ],
+        "failure": [
+            "Squeak! (Please don’t tickle me like that, I’m gonna lose my breath!)"
+        ]
+    },
+    "nuzzle": {
+        "success": [
+            "Squeak squeak squeak! (Your face is so close to mine! I hope you weren’t planning on doing anything else with me~. Hehe, I’m just teasing you!)"
+        ],
+        "failure": [
+            "Squeak? (That’s a bit too close don’t you think?)"
+        ]
+    },
+    "brush": {
+        "success": [
+            "Squeak squeak! Squeak? (Ah, my hair is so soft and smooth now! Thank you so much! Do you want to feel it now?)"
+        ],
+        "failure": [
+            "Squeak. (I think I can brush my own hair, but thank you for the offer.)"
+        ]
+    },
+    "massage": {
+        "success": [
+            "Squeak squeak! (Oh wow, my whole body feels great now! My shoulders were so sore, and my feet were absolutely worn out!)"
+        ],
+        "failure": [
+            "Squeak squeak squeak? (You’re squeezing my joints too hard! Is this a massage or is this torture? Did I do something wrong?)"
+        ]
+    },
+    "bellyrub": {
+        "success": [
+            "Squeak! (My tummy feels so lovely with you rubbing it like that!)"
+        ],
+        "failure": [
+            "Squeak (That’s too rough! If you rub my stomach like that I’m gonna lose all that food I’ve been fed!)"
+        ]
+    },
+    "cuddle": {
+        "success": [
+            "Squeak squeak~! (It’s like we’re hugging but while we’re lying down! That makes it all the more intimate~!)"
+        ],
+        "failure": [
+            "Squeak squeak? (Why are you lying on the ground? Did you drop something that you’re looking for?)"
+        ]
+    },
+    "holdhands": {
+        "success": [
+            "Squeak squeak squeak! (Are you sure? What if the other students see us! A-alright, but only for a while!)"
+        ],
+        "failure": [
+            "Squeak squeak squeak squeak. (Wow, your hand is really sweaty! Maybe you should dry them off so you don’t gross someone out. Wait, you wanted to hold hands with me? I-I don’t think we’re quite there yet as friends.)"
+        ]
+    }
+}
+}
