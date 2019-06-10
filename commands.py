@@ -172,8 +172,10 @@ class CommandHandler:
             # reach this point if we succeed, do whatever you want here
             # Any fully successful command will set a new cooldown.
             this_cooldown[user] = now + 30.0
-            if result is None or result: # catch commands which dont return anything
+            if result is None or result == True: # catch commands which dont return anything
                 self.log.info(f"{user} executed command {name} successfully.")
+            elif result is not None and result != False:
+                self.log.info(f"{user} executed command {name} successfully with status: {result}")
             else:
                 self.log.info(f"{user} attempted to execute command {name} but was denied.")
 
@@ -385,7 +387,7 @@ class CommandHandler:
             raise BrieError(e.message)
         except BondFailedError:
             self.send_message(self.__choose_line(self.dialogue["bonding"][bond_name]["failure"]))
-            return True
+            return "Bond failed."
         except:
             raise
 
