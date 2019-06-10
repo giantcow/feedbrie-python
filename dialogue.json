@@ -181,6 +181,7 @@
 },
 "info": {
     "nofood": "Squeak. (That food doesn’t look like it’s in season.)",
+    "nofreefeed": "Squeak? (I don't think you have anymore crackers?)",
     "nobrush": "Squeak. (You might need a brush for that.)",
     "noscratcher": "Squeak. (I think the Student Store sells scratchers.)",
     "nofeather": "Squeak. (You should check the Student Store for feathers.)",
