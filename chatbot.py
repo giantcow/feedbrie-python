@@ -22,7 +22,7 @@ sentry_sdk.init(
 )
 
 log = logging.getLogger("chatbot")
-epicfilehandler = logging.FileHandler("chatbot.log")
+epicfilehandler = logging.FileHandler("chatbot.log", 'a', 'utf-8')
 epicfilehandler.setFormatter(logging.Formatter("[%(asctime)s] [%(module)s] [%(levelname)s]: %(message)s"))
 log.setLevel(logging.DEBUG)
 log.addHandler(epicfilehandler)
@@ -106,7 +106,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         Event run for every message sent in the IRC Channel
         '''
         name = event.source.nick.lower()
-        message = event.arguments[0]
+        message = event.arguments[0].strip()
         id = ""
 
         for d in event.tags: # irc, why did you decide this format was good?
