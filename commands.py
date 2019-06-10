@@ -268,7 +268,7 @@ class CommandHandler:
         Direct Message a user the help guide.
         '''
         # Left args in for specificity on commands for later, if wanted
-        self.send_message("Help guide placeholder")
+        self.send_message("https://brie.everything.moe")
         return True
 
     async def cmd_stats(self, user, args):
