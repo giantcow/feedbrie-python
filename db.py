@@ -219,7 +219,7 @@ async def do_decay():
     except (mariadb.Error) as error:
         log.error(f"Failed to decay affection and bond_level values! {error}")
 
-@scheduler.scheduled_job('interval', id='test2', seconds=3)
+@scheduler.scheduled_job('interval', id='test2', hours=24)
 async def do_calc_happiness():
     
     happiness = 0
