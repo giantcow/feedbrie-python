@@ -81,12 +81,12 @@ class BondHandler:
         can_try = await db.get_value(user_id, "bonds_available")
         if can_try <= 0:
             raise NoMoreAttemptsError
-        await db.remove_value(user_id, "bonds_available", 1)
 
         has_item = await BondHandler.handle_item(user_id, bond)
         if not has_item:
             raise MissingItemError(bond["item"])
-
+        
+        await db.remove_value(user_id, "bonds_available", 1)
         user_aff = await db.get_value(user_id, "affection")
         worth = bond["worth"]
         gate = bond["gate_aff"]

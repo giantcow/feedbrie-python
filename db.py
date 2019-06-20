@@ -146,6 +146,21 @@ class Database():
             log.error(f"Failed to get {val_name} column \n {error}")
             raise
 
+    @staticmethod
+    async def get_top_rows_by_column(col_name, order_name, limit):
+        if col_name not in Database.__user_table_fields: raise InvalidFieldException(field=col_name)
+        
+        __sql = f"SELECT {col_name} FROM users ORDER BY {order_name} DESC LIMIT {limit}"
+
+        try:
+            cursor.execute(__sql)
+            res = cursor.fetchall()
+            out = [data[0] for data in res]
+            return out
+        except (mariadb.Error, InvalidFieldException) as error:
+            log.error(f"Failed to grab {col_name} ordered by {order_name} column \n {error}")
+            raise
+
     #########################
     #                       #
     #       Helpers         #

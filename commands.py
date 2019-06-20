@@ -268,16 +268,20 @@ class CommandHandler:
         Direct Message a user the help guide.
         '''
         # Left args in for specificity on commands for later, if wanted
-        self.send_message("https://brie.everything.moe")
+        self.send_message("Read how to play the game here! https://brie.everything.moe")
         return True
 
-    async def cmd_stats(self, user, args):
+    async def cmd_stats(self, user, uid, args):
         '''
         Direct Message a user personal stats.
         '''
         # Left args in for specificity, if wanted
-        # TODO: query for necessary user stats
-        self.send_message("stats placeholder")
+        
+        affection = await db.get_value(uid, "affection")
+        bond_level = await db.get_value(uid, "bond_level")
+        stat_str = f"{user}\'s stats with me are: {affection}% affection, {bond_level} bond level!"
+
+        self.send_message(stat_str)
         return True
 
     async def cmd_bond(self, user, args):
@@ -285,8 +289,12 @@ class CommandHandler:
         Display the bond leaderboard and happiness level.
         '''
         # Left args in for whatever reason
-        # TODO: query for users with highest bond
-        self.send_message("leaderboard placeholder")
+        
+        leaders = await db.get_top_rows_by_column("username", "bond_level", 5)
+        runner_ups = f"{leaders[1]}, {leaders[2]}, {leaders[3]}, and {leaders[4]}"
+        leaderboard_str = f"I love {leaders[0]} the most! I have fun with {runner_ups} too!"
+
+        self.send_message(leaderboard_str)
         return True
 
     async def cmd_feed(self, user, uid, args):
