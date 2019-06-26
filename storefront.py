@@ -93,16 +93,22 @@ class StoreHandler:
         if user_sp < try_food["cost"]:
             raise NotEnoughSPError
         await db.set_fed_brie_timestamp(user_id)
+
+        affection_to_add = try_food["affection"]
+        curr_affection = await db.get_value(user_id, "affection")
+        if curr_affection + affection_to_add > 100:
+            affection_to_add = 100 - curr_affection
+        
         if item == "cracker":
             free_feed_used = await db.get_value(user_id, "free_feed")
             if free_feed_used == 1:
                 raise FreeFeedUsed
             await db.set_value(user_id, "free_feed", 1)
-            await db.add_value(user_id, "affection", try_food["affection"])
+            await db.add_value(user_id, "affection", affection_to_add)
             return 0
         else:
             await db.add_value(user_id, "bonds_available", 1)
-            await db.add_value(user_id, "affection", try_food["affection"])
+            await db.add_value(user_id, "affection", affection_to_add)
             return try_food["cost"]
 
     @staticmethod
@@ -135,6 +141,12 @@ class StoreHandler:
             raise NoItemError
         if user_sp < try_gift["cost"]:
             raise NotEnoughSPError
+        
         reward = StoreHandler.gamble_puzzle(item, 60, 30)
-        await db.set_value(user_id, "affection", reward["value"])
+        affection_to_add = reward["value"]
+        curr_affection = await db.get_value(user_id, "affection")
+        if curr_affection + affection_to_add > 100:
+            affection_to_add = 100 - curr_affection
+        
+        await db.set_value(user_id, "affection", affection_to_add)
         return {"cost": try_gift["cost"], "reward": reward["type"]}

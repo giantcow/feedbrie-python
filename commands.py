@@ -291,8 +291,10 @@ class CommandHandler:
         # Left args in for whatever reason
         
         leaders = await db.get_top_rows_by_column("username", "bond_level", 5)
+        brie_happiness = await db.get_brie_happiness()
+        brie_hapLevel = brie_happiness//100 # floored integer
         runner_ups = f"{leaders[1]}, {leaders[2]}, {leaders[3]}, and {leaders[4]}"
-        leaderboard_str = f"I love {leaders[0]} the most! I have fun with {runner_ups} too!"
+        leaderboard_str = f"I love {leaders[0]} the most! But {runner_ups} are special too! My current happiness level is {brie_hapLevel}!"
 
         self.send_message(leaderboard_str)
         return True
