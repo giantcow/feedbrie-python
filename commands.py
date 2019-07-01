@@ -6,6 +6,7 @@ import logging
 import json
 from streamElements import StreamElementsAPI
 from db import Database as db
+from db import BRIES_ID
 from bonds import BondHandler, NoMoreAttemptsError, MissingItemError, BondFailedError
 from storefront import StoreHandler, NoItemError, NotEnoughSPError, AlreadyOwnedError, FreeFeedUsed, OutOfSeasonError
 
@@ -290,7 +291,7 @@ class CommandHandler:
         '''
         # Left args in for whatever reason
         
-        leaders = await db.get_top_rows_by_column("username", "bond_level", 5)
+        leaders = await db.get_top_rows_by_column_exclude_uid("username", "bond_level", 5, BRIES_ID)
         brie_happiness = await db.get_brie_happiness()
         brie_hapLevel = brie_happiness//100 # floored integer
         if len(leaders) >= 3:

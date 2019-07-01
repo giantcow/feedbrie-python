@@ -148,9 +148,16 @@ class Database():
 
     @staticmethod
     async def get_top_rows_by_column(col_name, order_name, limit):
+        return await Database.get_top_rows_by_column_exclude_uid(col_name, order_name, limit)
+
+    @staticmethod
+    async def get_top_rows_by_column_exclude_uid(col_name, order_name, limit, uid = None):
         if col_name not in Database.__user_table_fields: raise InvalidFieldException(field=col_name)
-        
-        __sql = f"SELECT {col_name} FROM users ORDER BY {order_name} DESC LIMIT {limit}"
+
+        if uid is None:
+            __sql = f"SELECT {col_name} FROM users ORDER BY {order_name} DESC LIMIT {limit}"
+        else:
+            __sql = f"SELECT {col_name} FROM users WHERE user_id != {uid} ORDER BY {order_name} DESC LIMIT {limit}"
 
         try:
             cursor.execute(__sql)
