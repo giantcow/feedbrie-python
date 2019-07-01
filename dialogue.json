@@ -111,11 +111,11 @@
     ],
     "grapes": [
         "Squeak squeak! (These are tiny water balloons! It's a pop of juice and flavor with every bite!)",
-        "placeholder"
+        ""
     ],
     "blackberry": [
         "Squeak squeak! (Oh! I thought these weren't made anymore now that smartphones are so widely produced!)",
-        "placeholder"
+        ""
     ],
     "huckleberry": [
         ""
@@ -180,13 +180,17 @@
     ]
 },
 "info": {
-    "nofood": "Squeak. (That food doesn't look like it's in season.)",
+    "noseason": "Squeak. (That food doesn't look like it's in season.)",
     "nofreefeed": "Squeak? (I don't think you have anymore crackers?)",
     "nobrush": "Squeak. (You might need a brush for that.)",
     "noscratcher": "Squeak. (I think the Student Store sells scratchers.)",
     "nofeather": "Squeak. (You should check the Student Store for feathers.)",
     "nosp": "Squeak. (You don't have enough Student Points to buy that.)",
-    "cantbuy": "Squeak. (You can't buy that!)"
+    "cantbuyitem": "Squeak. (You can't buy that!)",
+    "cantbuyfood": "Squeak. (That food isn't an option.)",
+    "alreadyown": "Squeak. (You already own that!)",
+    "cantbuygift": "Squeak. (That gift isn't an option.)",
+    "noattempts": "Squeak. (No more. Feed me instead, please.)"
 },
 "gifts": {
 	"puzzle": {

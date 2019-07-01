@@ -16,7 +16,11 @@ class NotEnoughSPError(Exception):
 
 class NoItemError(Exception):
     def __init__(self):
-        self.message = "That is not in season or not a store item."
+        self.message = "That is not a store item."
+
+class OutOfSeasonError(Exception):
+    def __init__(self):
+        self.message = "That is out of season."
 
 class FreeFeedUsed(Exception):
     def __init__(self):
@@ -87,9 +91,13 @@ class StoreHandler:
         '''
         season = StoreHandler.__get_season()
         seasonal_list = {**StoreHandler.store_list["base"], **StoreHandler.store_list[season]}
+        whole_list = {k:v for d_k in StoreHandler.store_list for k, v in StoreHandler.store_list[d_k].items()}
         try_food = seasonal_list.get(item, None)
-        if try_food is None:
+        whole_try = whole_list.get(item, None)
+        if try_food is None and whole_try is None:
             raise NoItemError
+        elif try_food is None:
+            raise OutOfSeasonError
         if user_sp < try_food["cost"]:
             raise NotEnoughSPError
         await db.set_fed_brie_timestamp(user_id)

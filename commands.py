@@ -7,7 +7,7 @@ import json
 from streamElements import StreamElementsAPI
 from db import Database as db
 from bonds import BondHandler, NoMoreAttemptsError, MissingItemError, BondFailedError
-from storefront import StoreHandler, NoItemError, NotEnoughSPError, AlreadyOwnedError, FreeFeedUsed
+from storefront import StoreHandler, NoItemError, NotEnoughSPError, AlreadyOwnedError, FreeFeedUsed, OutOfSeasonError
 
 class NotEnoughArgsError(Exception):
     def __init__(self, num):
@@ -315,7 +315,10 @@ class CommandHandler:
             await self.se.set_user_points(user, -cost)
             self.send_message(self.__choose_line(self.dialogue["food"][item]))
         except NoItemError as e:
-            self.send_message(self.dialogue["info"]["cantbuy"])
+            self.send_message(self.dialogue["info"]["cantbuyfood"])
+            raise BrieError(e.message)
+        except OutOfSeasonError as e:
+            self.send_message(self.dialogue["info"]["noseason"])
             raise BrieError(e.message)
         except NotEnoughSPError as e:
             self.send_message(self.dialogue["info"]["nosp"])
@@ -343,7 +346,7 @@ class CommandHandler:
             await self.se.set_user_points(user, -puzzle["cost"])
             self.send_message(self.dialogue["gifts"]["puzzle"][puzzle["reward"]])
         except NoItemError as e:
-            self.send_message(self.dialogue["info"]["cantbuy"])
+            self.send_message(self.dialogue["info"]["cantbuygift"])
             raise BrieError(e.message)
         except NotEnoughSPError as e:
             self.send_message(self.dialogue["info"]["nosp"])
@@ -368,13 +371,13 @@ class CommandHandler:
             await self.se.set_user_points(user, -cost)
             self.send_message(f"Squeak! (Here's your {item})!")
         except NoItemError as e:
-            self.send_message(self.dialogue["info"]["cantbuy"])
+            self.send_message(self.dialogue["info"]["cantbuyitem"])
             raise BrieError(e.message)
         except NotEnoughSPError as e:
             self.send_message(self.dialogue["info"]["nosp"])
             raise BrieError(e.message)
         except AlreadyOwnedError as e:
-            self.send_message("Squeak! (You already own that!)")
+            self.send_message(self.dialogue["info"]["alreadyown"])
             raise BrieError(e.message)
         except:
             raise
@@ -390,7 +393,7 @@ class CommandHandler:
             self.send_message(self.__choose_line(self.dialogue["bonding"][bond_name]["success"]))
             return True
         except NoMoreAttemptsError:
-            self.send_message("Squeak. (No more. Feed me instead, please.)")
+            self.send_message(self.dialogue["info"]["noattempts"])
             raise BrieError("Out of bond attempts.")
         except MissingItemError as e:
             self.send_message(self.dialogue["info"][f"no{bond['item']}"])
