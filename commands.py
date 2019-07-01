@@ -293,8 +293,13 @@ class CommandHandler:
         leaders = await db.get_top_rows_by_column("username", "bond_level", 5)
         brie_happiness = await db.get_brie_happiness()
         brie_hapLevel = brie_happiness//100 # floored integer
-        runner_ups = f"{leaders[1]}, {leaders[2]}, {leaders[3]}, and {leaders[4]}"
-        leaderboard_str = f"I love {leaders[0]} the most! But {runner_ups} are special too! My current happiness level is {brie_hapLevel}!"
+        if len(leaders) >= 3:
+            runner_ups = f'But {", ".join(leaders[1:-1])} and {leaders[-1]} are special, too! '
+        elif len(leaders) == 2:
+            runner_ups = f"But {leaders[-1]} is special, too! "
+        else:
+            runner_ups = ""
+        leaderboard_str = f"I love {leaders[0]} the most! {runner_ups}My current happiness level is {brie_hapLevel}!"
 
         self.send_message(leaderboard_str)
         return True
