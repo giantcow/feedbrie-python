@@ -111,39 +111,47 @@
     ],
     "grapes": [
         "Squeak squeak! (These are tiny water balloons! It's a pop of juice and flavor with every bite!)",
-        ""
+        "Squeak! (Ms Bobber says I can't have wine, but wine is made from grapes! And grapes are great!)"
     ],
     "blackberry": [
         "Squeak squeak! (Oh! I thought these weren't made anymore now that smartphones are so widely produced!)",
-        ""
+        "Squeak squeak! (Why are these called blackberries? My hands are all purple!)"
     ],
     "huckleberry": [
-        ""
+        "Squeak! (I love these in tarts, but they're also great on their own!)",
+        "Squeak squeak! (I prefer eating these over reading the novel!)"
     ],
     "lettuce": [
         "Squeak! (Lettuce is really just a salad ball when you think about it!)",
         "Squeak squeak! (Whenever I get taken to the store and the sprinkler system sprays the lettuce, they sparkle like a disco ball! Someone should hang them up so the supermarket can be more lively!)"
     ],
     "cranberry": [
-        ""
+        "Squeak squeak! (It doesn't have to be Thanksgiving to enjoy some cranberries!)",
+        "Squeak! (Sour, but gimme more!)"
     ],
     "yam": [
-        ""
+        "Squeak? Squeak! (Is this a yam or a sweet potato? Either way, I'm eating it!)",
+        "Squeak! (I love roasting these on a cool autumn afternoon~!)"
     ],
     "pumpkin": [
-        ""
+        "Squeak squeak! (Why carve these into jack-o-lanterns when you can just eat them!)",
+        "Squeak! (Pumpkins come in all shapes and sizes, I wanna try them all!)"
     ],
     "fig": [
-        ""
+        "Squeak squeak! (I love figs, they're basically desserts on their own!)",
+        "Squeak! (Figs are great for slow roasting, so sweet!)"
     ],
     "quince": [
-        ""
+        "Squeak! Squeak! (What a weird looking pear! But it's so tasty!)",
+        "Squeak squeak! (I can never turn down a slow roasted quince!)"
     ],
     "persimmon": [
-        ""
+        "Squeak! (It kinda looks like a tomato and apricot fused!)",
+        "Squeak squeak! (It's so sweet, almost like honey!)"
     ],
     "pomegranate": [
-        ""
+        "Squeak squeak! (It's like candy corn but fruit!)",
+        "Squeak squeak! (So many sweet juicy seeds!)"
     ],
     "kumquat": [
         "Squeak squeak squeak! (Some people say if you find a kumquat, the momma orange isn't far away! Who are the people that say that? Farmers, probably!)",
@@ -194,15 +202,16 @@
 },
 "gifts": {
 	"puzzle": {
-		"common": "Squeak. (Thanks for the gift.)",
-		"uncommon": "Squeak! (Thanks for the gift!)",
-		"rare": "Squeak squeak! (Wow! This is amazing, thanks!)"
+		"common": "Squeak. (This was fun but I can't seem to solve it.)",
+		"uncommon": "Squeak! (I almost solved this one!)",
+		"rare": "Squeak! Squeak squeak! (Wow! Look look! I solved it!)"
 	}
 },
 "bonding": {
     "headpat": {
         "success": [
-            "Squeak! (Hehe, I love how much attention you're giving me!)"
+            "Squeak! (Hehe, I love how much attention you're giving me!)",
+            "Squeak! (Hehe, your pats are so comforting!)"
         ],
         "failure": [
             "Squeak squeak? (Please don't mess up my hair like that! I have an image to uphold for the class, you know?)"
@@ -210,7 +219,8 @@
     },
     "scratch": {
         "success": [
-            "Squeak squeak! (Oh yeah, that feels great! Please scratch behind my ears too!)"
+            "Squeak squeak! (Oh yeah, that feels great! Please scratch behind my ears too!)",
+            "Squeak squeak! (Haaa.. this really is a great way to relax!)"
         ],
         "failure": [
             "Squeak squeak? (Eep! Sorry, I'm very sensitive to being scratched, could you give me some more food first?)"
@@ -218,7 +228,8 @@
     },
     "hug": {
         "success": [
-            "Squeak squeak! (I love your hugs! They're so warm and comforting!)"
+            "Squeak squeak! (I love your hugs! They're so warm and comforting!)",
+            "Squeak squeak! (Aww, thanks! I love getting hugs!)"
         ],
         "failure": [
             "Squeak. (Oof, please don't hug me so tight.)"
@@ -226,7 +237,8 @@
     },
     "tickle": {
         "success": [
-            "Squeak squeak squeak~! (Ah! Hehehe, under my chin is really ticklish! Haha~!)"
+            "Squeak squeak squeak~! (Ah! Hehehe, under my chin is really ticklish! Haha~!)",
+            "Squeak squeak~! (Ah! Hahahahaha~! Stop it~!)"
         ],
         "failure": [
             "Squeak! (Please don't tickle me like that, I'm gonna lose my breath!)"
@@ -234,7 +246,8 @@
     },
     "nuzzle": {
         "success": [
-            "Squeak squeak squeak! (Your face is so close to mine! I hope you weren't planning on doing anything else with me~. Hehe, I'm just teasing you!)"
+            "Squeak squeak squeak! (Your face is so close to mine! I hope you weren't planning on doing anything else with me~. Hehe, I'm just teasing you!)",
+            "Squeak squeak~! (Hehe~! Is my hair tickling your face?)"
         ],
         "failure": [
             "Squeak? (That's a bit too close don't you think?)"
@@ -242,7 +255,8 @@
     },
     "brush": {
         "success": [
-            "Squeak squeak! Squeak? (Ah, my hair is so soft and smooth now! Thank you so much! Do you want to feel it now?)"
+            "Squeak squeak! Squeak? (Ah, my hair is so soft and smooth now! Thank you so much! Do you want to feel it now?)",
+            "Squeak squeak! Squeak? (Aw thank you! My hair feels so much better now! Do you want me to brush yours~?)"
         ],
         "failure": [
             "Squeak. (I think I can brush my own hair, but thank you for the offer.)"
@@ -250,7 +264,8 @@
     },
     "massage": {
         "success": [
-            "Squeak squeak! (Oh wow, my whole body feels great now! My shoulders were so sore, and my feet were absolutely worn out!)"
+            "Squeak squeak! (Oh wow, my whole body feels great now! My shoulders were so sore, and my feet were absolutely worn out!)",
+            "Squeak squeak~! (Haaa.. your hands are working wonders on my sore body~!)"
         ],
         "failure": [
             "Squeak squeak squeak? (You're squeezing my joints too hard! Is this a massage or is this torture? Did I do something wrong?)"
@@ -258,7 +273,8 @@
     },
     "bellyrub": {
         "success": [
-            "Squeak! (My tummy feels so lovely with you rubbing it like that!)"
+            "Squeak! (My tummy feels so lovely with you rubbing it like that!)",
+            "Squeak squeak! (Hehe, belly rubs are my favorite! I'm so happy you're around!)"
         ],
         "failure": [
             "Squeak (That's too rough! If you rub my stomach like that I'm gonna lose all that food I've been fed!)"
@@ -266,7 +282,8 @@
     },
     "cuddle": {
         "success": [
-            "Squeak squeak~! (It's like we're hugging but while we're lying down! That makes it all the more intimate~!)"
+            "Squeak squeak~! (It's like we're hugging but while we're lying down! That makes it all the more intimate~!)",
+            "Squeak squeak~! (Gosh, you're so close to me, I hope you can't hear how fast my heart is beating~!)"
         ],
         "failure": [
             "Squeak squeak? (Why are you lying on the ground? Did you drop something that you're looking for?)"
@@ -274,7 +291,9 @@
     },
     "holdhands": {
         "success": [
-            "Squeak squeak squeak! (Are you sure? What if the other students see us! A-alright, but only for a while!)"
+            "Squeak squeak squeak! (Are you sure? What if the other students see us! A-alright, but only for a while!)",
+            "Squeak squeak squeak! (Ah! Our fingers are intertwined! I'm so embarassed~!)",
+            "S-Squeak squeak~! (Y-You want to hold hands? O-Okay! Gosh, my face must be so red!)"
         ],
         "failure": [
             "Squeak squeak squeak squeak. (Wow, your hand is really sweaty! Maybe you should dry them off so you don't gross someone out. Wait, you wanted to hold hands with me? I-I don't think we're quite there yet as friends.)"
