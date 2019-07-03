@@ -227,43 +227,6 @@ class CommandHandler:
             return True
         return False
 
-    async def cmd_tu(self, user, uid):
-        '''
-        test user create
-        '''
-        await db.create_new_user(uid, user)
-        return True
-
-    async def cmd_test_getpoints(self, user):
-        '''
-        test get points
-        '''
-        if user != self.parent.host:
-            return False
-        amount = await self.se.get_user_points(user)
-        self.send_message(f"you have {amount} points")
-        return True
-
-    async def cmd_test_setpoints(self, user, args, mention_list):
-        '''
-        test set points of 1 user
-        '''
-        if user != self.parent.host:
-            return False
-        if len(args) < 2:
-            raise NotEnoughArgsError(2 - len(args))
-
-        # try your best to get the person of interest
-        # justification for mention_list: args will not strip the '@' automatically so why not
-        target = mention_list[0] if len(mention_list) != 0 else args[0]
-        try:
-            amount = int(args[1])
-        except:
-            raise BrieError("The second argument given could not be converted to an integer.")
-        new_amount = await self.se.set_user_points(target, amount)
-        self.send_message(f"set {target} points to {new_amount}")
-        return True
-
     async def cmd_help(self, user, args):
         '''
         Direct Message a user the help guide.
