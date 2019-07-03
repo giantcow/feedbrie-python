@@ -248,7 +248,7 @@ class CommandHandler:
         self.send_message(stat_str)
         return True
 
-    async def cmd_bond(self, user, args):
+    async def cmd_topbonds(self, user, args):
         '''
         Display the bond leaderboard and happiness level.
         '''
