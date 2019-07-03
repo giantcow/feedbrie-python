@@ -9,13 +9,37 @@ log = logging.getLogger("chatbot")
 
 BRIES_ID = "436478155"
 
-try:
-    mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
-except mariadb.Error as error:
-    log.error(f"Failed to connect to the MariaDB server: {error}")
-    raise
+def connect():
+    try:
+        # Should probably move the credentials to a config
+        mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
+        return mariadb_connection
+    except mariadb.Error as error:
+        log.error(f"Failed to connect to the MariaDB server: {error}")
+        raise
 
-cursor = mariadb_connection.cursor()
+connection = connect()
+cursor = connection.cursor()
+
+def query(sql):
+    try:
+      cursor = connection.cursor()
+      cursor.execute(sql)
+    except (AttributeError, MySQLdb.OperationalError):
+      connect()
+      cursor = connection.cursor()
+      cursor.execute(sql)
+    return cursor
+
+def dict_query(sql):
+    try:
+      dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
+      dict_cursor.execute(sql)
+    except (AttributeError, MySQLdb.OperationalError):
+      connect()
+      dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
+      dict_cursor.execute(sql)
+    return cursor
 
 class DatabaseException(Exception):
     def __init__(self, message="This is a generic database error."):
@@ -34,9 +58,10 @@ class InvaludUserIdTypeException(Exception):
         self.message = f"{user_id} is not a valid user id because: {reason}"
 
 class Database():
-
+    
     @staticmethod
     def user_id_check(user_id):
+
         if isinstance(user_id, str):
             if len(user_id) > 100:
                 raise InvaludUserIdTypeException(user_id=user_id, reason="Max ID length is 100 characters")
@@ -44,10 +69,11 @@ class Database():
             raise InvaludUserIdTypeException(user_id=user_id, reason="Non-string type.")
 
     def __get_table_fields(table):
+
         __sql = f"SHOW COLUMNS FROM {table}"
         fields = []
         try:
-            cursor.execute(__sql)
+            cursor = query(__sql)
             res = cursor.fetchall()
             for field in res:
                 fields.append(field[0])
@@ -63,13 +89,14 @@ class Database():
         '''
         Creates new user entry with default values from config.
         '''
+            
         try:
             Database.user_id_check(user_id)
             now = time.time()
             now = dt.datetime.fromtimestamp(now).strftime("%Y-%m-%d %H:%M:%S")
 
             # By not updating last_fed_brie_timestamp it inherits the default value defined by the table schema.
-            cursor.execute(
+            cursor = query(
                 "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
                 (username,user_id,0,0,0,0,0,0,1,now,now)
             )
@@ -85,7 +112,7 @@ class Database():
 
         try:
             Database.user_id_check(index)
-            cursor.execute(__sql)
+            cursor = query(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error(f"Failed to set {val_name} to {val} for user_id: {index} \n {error}")
             raise
@@ -98,7 +125,7 @@ class Database():
 
         try:
             Database.user_id_check(index)
-            cursor.execute(__sql)
+            cursor = query(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error(f"Failed to set {val_name} to {val} for user_id: {index} \n {error}")
             raise
@@ -111,7 +138,7 @@ class Database():
 
         try:
             Database.user_id_check(index)
-            cursor.execute(__sql)
+            cursor = query(__sql)
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error(f"Failed to set {val_name} to {val} for user_id: {index} \n {error}")
             raise
@@ -124,7 +151,7 @@ class Database():
 
         try:
             Database.user_id_check(index)
-            cursor.execute(__sql)
+            cursor = query(__sql)
             res = cursor.fetchall()
             return res[0][0]
         except (mariadb.Error, InvaludUserIdTypeException) as error:
@@ -138,7 +165,7 @@ class Database():
         __sql = f"SELECT {val_name} FROM users"
 
         try:
-            cursor.execute(__sql)
+            cursor = query(__sql)
             res = cursor.fetchall()
             out = [data[0] for data in res]
             return out
@@ -147,7 +174,7 @@ class Database():
             raise
 
     @staticmethod
-    async def get_top_rows_by_column(col_name, order_name, limit):
+    async def get_top_rows_by_column(col_name, order_name, limit):            
         return await Database.get_top_rows_by_column_exclude_uid(col_name, order_name, limit)
 
     @staticmethod
@@ -160,7 +187,7 @@ class Database():
             __sql = f"SELECT {col_name} FROM users WHERE user_id != {uid} ORDER BY {order_name} DESC LIMIT {limit}"
 
         try:
-            cursor.execute(__sql)
+            cursor = query(__sql)
             res = cursor.fetchall()
             out = [data[0] for data in res]
             return out
@@ -214,6 +241,7 @@ class Database():
 scheduler = AsyncIOScheduler()
 
 async def do_decay():
+
     __sql = f"""
             UPDATE users 
             SET free_feed = 0,
@@ -235,28 +263,21 @@ async def do_decay():
             WHERE user_id != {BRIES_ID};
             """
     try:
-        cursor.execute(__sql)
+        cursor = query(__sql)
         res = cursor.fetchall()
         log.info("Decayed affection and bond_level values in the database!")
     except (mariadb.Error) as error:
         log.error(f"Failed to decay affection and bond_level values! {error}")
 
 @scheduler.scheduled_job('interval', id='test2', hours=24)
-async def do_calc_happiness():
-    
+async def do_calc_happiness():    
     happiness = 0
     
     old_happiness = await Database.get_value(BRIES_ID, "bond_level")
 
-    try:
-        dict_cursor = mariadb_connection.cursor(mariadb.cursors.DictCursor)
-    except (mariadb.Error) as error:
-        log.error(f"Failed to get DictCursor while calculating Brie's Happiness value: {error}")
-        return
-
     __sql = f"SELECT bond_level FROM users WHERE user_id != {BRIES_ID}"
     
-    dict_cursor.execute(__sql)
+    dict_cursor = dict_query(__sql)
     results = dict_cursor.fetchall()
 
     for res in results:
