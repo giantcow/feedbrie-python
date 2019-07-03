@@ -9,13 +9,17 @@ log = logging.getLogger("chatbot")
 
 BRIES_ID = "436478155"
 
-try:
-    mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
-except mariadb.Error as error:
-    log.error(f"Failed to connect to the MariaDB server: {error}")
-    raise
+def connect():
+    try:
+        # Should probably move the credentials to a config
+        mariadb_connection = mariadb.connect(host="localhost", user='brie', password='3th3rn3t', db='Brie', autocommit=True)
+        return mariadb_connection
+    except mariadb.Error as error:
+        log.error(f"Failed to connect to the MariaDB server: {error}")
+        raise
 
-cursor = mariadb_connection.cursor()
+connection = connect()
+cursor = connection.cursor()
 
 class DatabaseException(Exception):
     def __init__(self, message="This is a generic database error."):
@@ -37,6 +41,8 @@ class Database():
 
     @staticmethod
     def user_id_check(user_id):
+        if not connection.open: connect()
+
         if isinstance(user_id, str):
             if len(user_id) > 100:
                 raise InvaludUserIdTypeException(user_id=user_id, reason="Max ID length is 100 characters")
@@ -44,6 +50,8 @@ class Database():
             raise InvaludUserIdTypeException(user_id=user_id, reason="Non-string type.")
 
     def __get_table_fields(table):
+        if not connection.open: connect()
+
         __sql = f"SHOW COLUMNS FROM {table}"
         fields = []
         try:
@@ -63,6 +71,9 @@ class Database():
         '''
         Creates new user entry with default values from config.
         '''
+
+        if not connection.open: connect()
+            
         try:
             Database.user_id_check(user_id)
             now = time.time()
@@ -81,6 +92,8 @@ class Database():
     async def set_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
+        if not connection.open: connect()
+
         __sql = f"UPDATE users SET {val_name} = {val} WHERE user_id = {index}"
 
         try:
@@ -93,6 +106,8 @@ class Database():
     @staticmethod
     async def add_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
+
+        if not connection.open: connect()
 
         __sql = f"UPDATE users SET {val_name} = {val_name} + {val} WHERE user_id = {index}"
 
@@ -107,6 +122,8 @@ class Database():
     async def remove_value(index, val_name, val):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
+        if not connection.open: connect()
+
         __sql = f"UPDATE users SET {val_name} = {val_name} - {val} WHERE user_id = {index}"
 
         try:
@@ -119,6 +136,8 @@ class Database():
     @staticmethod
     async def get_value(index, val_name):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
+
+        if not connection.open: connect()
 
         __sql = f"SELECT {val_name} FROM users WHERE user_id = {index}"
 
@@ -135,6 +154,8 @@ class Database():
     async def get_column(val_name):
         if val_name not in Database.__user_table_fields: raise InvalidFieldException(field=val_name)
 
+        if not connection.open: connect()
+
         __sql = f"SELECT {val_name} FROM users"
 
         try:
@@ -147,12 +168,14 @@ class Database():
             raise
 
     @staticmethod
-    async def get_top_rows_by_column(col_name, order_name, limit):
+    async def get_top_rows_by_column(col_name, order_name, limit):            
         return await Database.get_top_rows_by_column_exclude_uid(col_name, order_name, limit)
 
     @staticmethod
     async def get_top_rows_by_column_exclude_uid(col_name, order_name, limit, uid = None):
         if col_name not in Database.__user_table_fields: raise InvalidFieldException(field=col_name)
+
+        if not connection.open: connect()
 
         if uid is None:
             __sql = f"SELECT {col_name} FROM users ORDER BY {order_name} DESC LIMIT {limit}"
@@ -214,6 +237,8 @@ class Database():
 scheduler = AsyncIOScheduler()
 
 async def do_decay():
+    if not connection.open: connect()
+
     __sql = f"""
             UPDATE users 
             SET free_feed = 0,
@@ -243,13 +268,15 @@ async def do_decay():
 
 @scheduler.scheduled_job('interval', id='test2', hours=24)
 async def do_calc_happiness():
+
+    if not connection.open: connect()
     
     happiness = 0
     
     old_happiness = await Database.get_value(BRIES_ID, "bond_level")
 
     try:
-        dict_cursor = mariadb_connection.cursor(mariadb.cursors.DictCursor)
+        dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
     except (mariadb.Error) as error:
         log.error(f"Failed to get DictCursor while calculating Brie's Happiness value: {error}")
         return
