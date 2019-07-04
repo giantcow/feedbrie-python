@@ -116,7 +116,7 @@ class CommandHandler:
 
         # Check if the channel is online.
         # We want this bot to deny all commands if the bot is online.
-        if self.parent.live and not self.allow_online:
+        if self.parent.live and not self.allow_online and name != "toggleonline":
             self.log.info(f"{user} tried to execute command {name} but the channel is online.")
             return False
 
