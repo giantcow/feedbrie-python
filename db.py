@@ -96,10 +96,20 @@ class Database():
             now = dt.datetime.fromtimestamp(now).strftime("%Y-%m-%d %H:%M:%S")
 
             # By not updating last_fed_brie_timestamp it inherits the default value defined by the table schema.
-            cursor = query(
-                "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
-                (username,user_id,0,0,0,0,0,0,1,now,now)
-            )
+            try:
+                cursor = connection.cursor()
+                cursor.execute(
+                    "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
+                    (username,user_id,0,0,0,0,0,0,1,now,now)
+                )
+            except (AttributeError, MySQLdb.OperationalError):
+                connect()
+                cursor = connection.cursor()
+                cursor.execute(
+                    "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
+                    (username,user_id,0,0,0,0,0,0,1,now,now)
+                )
+            return cursor
         except (mariadb.Error, InvaludUserIdTypeException) as error:
             log.error(f"Failed to create new user: {error}")
             raise
