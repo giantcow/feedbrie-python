@@ -198,12 +198,12 @@
     "cantbuyfood": "Squeak. (That food isn't an option.)",
     "alreadyown": "Squeak. (You already own that!)",
     "cantbuygift": "Squeak. (That gift isn't an option.)",
-    "noattempts": "Squeak. (No more. Feed me instead, please.)"
+    "noattempts": "Squeak. (No more. Feed me some good food, please!)"
 },
 "gifts": {
 	"puzzle": {
-		"common": "Squeak. (This was fun but I can't seem to solve it.)",
-		"uncommon": "Squeak! (I almost solved this one!)",
+		"common": "Squeak! (I almost solved this one!)",
+		"uncommon": "Squeak. (This was fun but I can't seem to solve it.)",
 		"rare": "Squeak! Squeak squeak! (Wow! Look look! I solved it!)"
 	}
 },
