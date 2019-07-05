@@ -25,17 +25,17 @@ def query(sql):
     try:
       cursor = connection.cursor()
       cursor.execute(sql)
-    except (AttributeError, MySQLdb.OperationalError):
+    except (AttributeError, mariadb.OperationalError):
       connect()
       cursor = connection.cursor()
       cursor.execute(sql)
     return cursor
 
-def dict_query(sql):
+async def dict_query(sql):
     try:
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
-    except (AttributeError, MySQLdb.OperationalError):
+    except (AttributeError, mariadb.OperationalError):
       connect()
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
@@ -253,24 +253,26 @@ scheduler = AsyncIOScheduler()
 async def do_decay():
 
     __sql = f"""
-            UPDATE users 
-            SET free_feed = 0,
-                bonds_available = 0, 
-                affection = 
-                    CASE 
-                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection > 5 THEN affection - 5
-                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection > 1 THEN affection - 1
-                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
-                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
-                    END,
-                bond_level = 
-                    CASE 
-                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level > 5 THEN bond_level - 5
-                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level > 1 THEN bond_level - 1
-                        WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
-                        WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
-                    END
-            WHERE user_id != {BRIES_ID};
+UPDATE users 
+SET free_feed = 0,
+    bonds_available = 0, 
+    affection = 
+        CASE 
+            WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection > 5 THEN affection - 5
+            WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection > 1 THEN affection - 1
+            WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
+            WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
+            ELSE affection
+        END,
+    bond_level = 
+        CASE 
+            WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level > 5 THEN bond_level - 5
+            WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level > 1 THEN bond_level - 1
+            WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
+            WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
+            ELSE affection
+        END
+WHERE user_id != 436478155;
             """
     try:
         cursor = query(__sql)
@@ -287,7 +289,7 @@ async def do_calc_happiness():
 
     __sql = f"SELECT bond_level FROM users WHERE user_id != {BRIES_ID}"
     
-    dict_cursor = dict_query(__sql)
+    dict_cursor = await dict_query(__sql)
     results = dict_cursor.fetchall()
 
     for res in results:
