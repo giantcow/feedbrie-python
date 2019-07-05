@@ -103,6 +103,7 @@ class StoreHandler:
         await db.set_fed_brie_timestamp(user_id)
 
         affection_to_add = try_food["affection"]
+        bond_to_add = try_food.get("bond", None)
         curr_affection = await db.get_value(user_id, "affection")
         if curr_affection + affection_to_add > 100:
             affection_to_add = 100 - curr_affection
@@ -117,6 +118,8 @@ class StoreHandler:
         else:
             await db.add_value(user_id, "bonds_available", 1)
             await db.add_value(user_id, "affection", affection_to_add)
+            if bond_to_add is not None:
+                await db.add_value(user_id, "bond_level", bond_to_add)
             return try_food["cost"]
 
     @staticmethod
