@@ -19,7 +19,6 @@ def connect():
         raise
 
 connection = connect()
-cursor = connection.cursor()
 
 def query(sql):
     global connection
@@ -41,7 +40,7 @@ async def dict_query(sql):
       connection = connect()
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
-    return cursor
+    return dict_cursor
 
 class DatabaseException(Exception):
     def __init__(self, message="This is a generic database error."):
