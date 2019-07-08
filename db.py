@@ -26,7 +26,7 @@ def query(sql):
       cursor = connection.cursor()
       cursor.execute(sql)
     except (AttributeError, mariadb.OperationalError):
-      connect()
+      connection = connect()
       cursor = connection.cursor()
       cursor.execute(sql)
     return cursor
@@ -36,7 +36,7 @@ async def dict_query(sql):
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
     except (AttributeError, mariadb.OperationalError):
-      connect()
+      connection = connect()
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
     return cursor
