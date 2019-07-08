@@ -22,6 +22,7 @@ connection = connect()
 cursor = connection.cursor()
 
 def query(sql):
+    global connection
     try:
       cursor = connection.cursor()
       cursor.execute(sql)
@@ -32,6 +33,7 @@ def query(sql):
     return cursor
 
 async def dict_query(sql):
+    global connection
     try:
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
