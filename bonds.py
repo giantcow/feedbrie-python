@@ -88,11 +88,13 @@ class BondHandler:
         
         await db.remove_value(user_id, "bonds_available", 1)
         user_aff = await db.get_value(user_id, "affection")
-        worth = bond["worth"]
-        gate = bond["gate_aff"]
-        scale_min = bond["scale_min"]
-        scale_max = bond["scale_max"]
-        success = BondHandler.calculate_success(gate, user_aff, scale_min, scale_max)
+        success = False
+        if bond.get("min_aff", None) is None or user_aff >= bond["min_aff"]:
+            worth = bond["worth"]
+            gate = bond["gate_aff"]
+            scale_min = bond["scale_min"]
+            scale_max = bond["scale_max"]
+            success = BondHandler.calculate_success(gate, user_aff, scale_min, scale_max)
         if success:
             await db.add_value(user_id, "bond_level", worth)
         else:

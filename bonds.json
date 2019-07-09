@@ -60,6 +60,7 @@
 		"worth":8,
 		"item":"",
 		"gate_aff":80,
+		"min_aff": 30,
 		"scale_min":0,
 		"scale_max":98
 	},
@@ -68,6 +69,7 @@
 		"worth":10,
 		"item":"",
 		"gate_aff":90,
+		"min_aff": 45,
 		"scale_min":0,
 		"scale_max":80
 	},
@@ -76,6 +78,7 @@
 		"worth":12,
 		"item":"",
 		"gate_aff":100,
+		"min_aff": 60,
 		"scale_min":0,
 		"scale_max":70
 	}
