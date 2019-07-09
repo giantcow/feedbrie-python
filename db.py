@@ -19,27 +19,28 @@ def connect():
         raise
 
 connection = connect()
-cursor = connection.cursor()
 
 def query(sql):
+    global connection
     try:
       cursor = connection.cursor()
       cursor.execute(sql)
-    except (AttributeError, MySQLdb.OperationalError):
-      connect()
+    except (AttributeError, mariadb.OperationalError):
+      connection = connect()
       cursor = connection.cursor()
       cursor.execute(sql)
     return cursor
 
-def dict_query(sql):
+async def dict_query(sql):
+    global connection
     try:
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
-    except (AttributeError, MySQLdb.OperationalError):
-      connect()
+    except (AttributeError, mariadb.OperationalError):
+      connection = connect()
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
-    return cursor
+    return dict_cursor
 
 class DatabaseException(Exception):
     def __init__(self, message="This is a generic database error."):
@@ -89,7 +90,8 @@ class Database():
         '''
         Creates new user entry with default values from config.
         '''
-            
+
+        global connection
         try:
             Database.user_id_check(user_id)
             now = time.time()
@@ -102,12 +104,12 @@ class Database():
                     "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
                     (username,user_id,0,0,0,0,0,0,0,now,now)
                 )
-            except (AttributeError, MySQLdb.OperationalError):
-                connect()
+            except (AttributeError, mariadb.OperationalError):
+                connection = connect()
                 cursor = connection.cursor()
                 cursor.execute(
                     "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
-                    (username,user_id,0,0,0,0,0,0,1,now,now)
+                    (username,user_id,0,0,0,0,0,0,0,now,now)
                 )
             return cursor
         except (mariadb.Error, InvaludUserIdTypeException) as error:
@@ -262,6 +264,7 @@ async def do_decay():
                         WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection > 1 THEN affection - 1
                         WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
                         WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND affection <= 0 THEN 0
+                        ELSE affection
                     END,
                 bond_level = 
                     CASE 
@@ -269,8 +272,9 @@ async def do_decay():
                         WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level > 1 THEN bond_level - 1
                         WHEN last_fed_brie_timestamp <= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
                         WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
+                        ELSE affection
                     END
-            WHERE user_id != {BRIES_ID};
+            WHERE user_id != ${BRIES_ID};
             """
     try:
         cursor = query(__sql)
@@ -279,7 +283,6 @@ async def do_decay():
     except (mariadb.Error) as error:
         log.error(f"Failed to decay affection and bond_level values! {error}")
 
-@scheduler.scheduled_job('interval', id='test2', hours=24)
 async def do_calc_happiness():    
     happiness = 0
     
@@ -287,7 +290,7 @@ async def do_calc_happiness():
 
     __sql = f"SELECT bond_level FROM users WHERE user_id != {BRIES_ID}"
     
-    dict_cursor = dict_query(__sql)
+    dict_cursor = await dict_query(__sql)
     results = dict_cursor.fetchall()
 
     for res in results:
@@ -302,4 +305,5 @@ async def do_calc_happiness():
     
     await do_decay()
 
+scheduler.add_job(do_calc_happiness, 'cron', hour='11', jitter=1800)
 scheduler.start()
