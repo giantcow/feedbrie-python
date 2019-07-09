@@ -19,27 +19,28 @@ def connect():
         raise
 
 connection = connect()
-cursor = connection.cursor()
 
 def query(sql):
+    global connection
     try:
       cursor = connection.cursor()
       cursor.execute(sql)
     except (AttributeError, mariadb.OperationalError):
-      connect()
+      connection = connect()
       cursor = connection.cursor()
       cursor.execute(sql)
     return cursor
 
 async def dict_query(sql):
+    global connection
     try:
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
     except (AttributeError, mariadb.OperationalError):
-      connect()
+      connection = connect()
       dict_cursor = connection.cursor(mariadb.cursors.DictCursor)
       dict_cursor.execute(sql)
-    return cursor
+    return dict_cursor
 
 class DatabaseException(Exception):
     def __init__(self, message="This is a generic database error."):
@@ -89,7 +90,8 @@ class Database():
         '''
         Creates new user entry with default values from config.
         '''
-            
+
+        global connection
         try:
             Database.user_id_check(user_id)
             now = time.time()
@@ -102,12 +104,12 @@ class Database():
                     "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
                     (username,user_id,0,0,0,0,0,0,0,now,now)
                 )
-            except (AttributeError, MySQLdb.OperationalError):
-                connect()
+            except (AttributeError, mariadb.OperationalError):
+                connection = connect()
                 cursor = connection.cursor()
                 cursor.execute(
                     "INSERT INTO users (username,user_id,affection,bond_level,bonds_available,has_feather,has_brush,has_scratcher,free_feed,created_at,updated_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
-                    (username,user_id,0,0,0,0,0,0,1,now,now)
+                    (username,user_id,0,0,0,0,0,0,0,now,now)
                 )
             return cursor
         except (mariadb.Error, InvaludUserIdTypeException) as error:
