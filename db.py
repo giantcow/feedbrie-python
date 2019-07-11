@@ -274,7 +274,7 @@ async def do_decay():
                         WHEN last_fed_brie_timestamp >= NOW() - INTERVAL 1 DAY AND bond_level <= 0 THEN 0
                         ELSE affection
                     END
-            WHERE user_id != ${BRIES_ID};
+            WHERE user_id != {BRIES_ID};
             """
     try:
         cursor = query(__sql)
