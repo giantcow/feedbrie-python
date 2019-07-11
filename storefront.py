@@ -159,5 +159,5 @@ class StoreHandler:
         if curr_affection + affection_to_add > 100:
             affection_to_add = 100 - curr_affection
         
-        await db.set_value(user_id, "affection", affection_to_add)
+        await db.add_value(user_id, "affection", affection_to_add)
         return {"cost": try_gift["cost"], "reward": reward["type"]}
