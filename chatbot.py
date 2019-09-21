@@ -63,7 +63,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         while True:
             await asyncio.sleep(30)
-            if self.channel_id == "" or self.aio_session is None:
+            if self.aio_session is None:
                 continue
             try:
                 status = await self.is_live()
