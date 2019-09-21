@@ -88,9 +88,10 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
 
     def on_join(self, connection, event):
         '''
-        Event run on entrance to the IRC Channel
+        Event triggered by IRC JOIN Messages, which anyone can cause (starting with yourself)
         '''
-        print("WE IN, BOYS")
+        # print("Someone joined the Twitch IRC Channel.")
+        pass
 
     def on_disconnect(self, connection, event):
         '''
