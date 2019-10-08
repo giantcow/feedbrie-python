@@ -69,6 +69,9 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         while True:
             await asyncio.sleep(30)
+            if not self.connection.is_connected():
+                log.warning("Somehow, we lost the connection without knowing it.")
+                await self.connection.connect("irc.chat.twitch.tv", 6667, self.config.BOT_NAME, password=self.config.AUTH_ID)
             if self.aio_session is None:
                 continue
             try:
@@ -105,7 +108,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         # Changed handling in main(). This should work with SystemExit Exception.
         log.info("Disconnected from IRC.")
-        sys.exit(0)
+        # sys.exit(0) # this force quits the program on disconnect
 
     # Sub module dispatcher should be this function (this is the main menu essentially)  
     def on_pubmsg(self, connection, event):
@@ -221,9 +224,11 @@ def main():
             t.cancel()
         bot.reactor.loop.run_until_complete(bot.reactor.loop.shutdown_asyncgens())
         bot.reactor.loop.stop()
+        log.info("Bot working to disconnect and close (initial stage).")
     finally:
         bot.connection.disconnect()
         bot.reactor.loop.close()
+        log.info("Bot disconnected and closed (final stage).")
 
 if __name__ == "__main__":
     main()
