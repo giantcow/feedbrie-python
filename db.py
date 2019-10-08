@@ -2,8 +2,6 @@ import logging
 import MySQLdb as mariadb
 import time
 import datetime as dt
-from threading import Thread
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 log = logging.getLogger("chatbot")
 
@@ -250,8 +248,6 @@ class Database():
         # perhaps should do some formula to keep this on a 0-100 scale?
         return output
 
-scheduler = AsyncIOScheduler()
-
 async def do_decay():
 
     __sql = f"""
@@ -304,6 +300,3 @@ async def do_calc_happiness():
     log.info(f"Recalculated happiness! OLD: {old_happiness} NEW: {happiness}")
     
     await do_decay()
-
-scheduler.add_job(do_calc_happiness, 'cron', hour='11', jitter=1800)
-scheduler.start()

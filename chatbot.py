@@ -11,6 +11,8 @@ import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 from conf import *
 from commands import CommandHandler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from db import do_calc_happiness
 
 sentry_logging = LoggingIntegration(
     level=logging.DEBUG, 
@@ -27,6 +29,10 @@ epicfilehandler.setFormatter(logging.Formatter("[%(asctime)s] [%(module)s] [%(le
 log.setLevel(logging.DEBUG)
 log.addHandler(epicfilehandler)
 log.addHandler(logging.StreamHandler(sys.stdout))
+
+scheduler = AsyncIOScheduler()
+scheduler.add_job(do_calc_happiness, 'cron', hour='11', jitter=1800)
+scheduler.start()
 
 class TheBot(irc.client_aio.AioSimpleIRCClient):
     def __init__(self):
