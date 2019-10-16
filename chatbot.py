@@ -30,10 +30,6 @@ log.setLevel(logging.DEBUG)
 log.addHandler(epicfilehandler)
 log.addHandler(logging.StreamHandler(sys.stdout))
 
-scheduler = AsyncIOScheduler()
-scheduler.add_job(do_calc_happiness, 'cron', hour='11', jitter=1800)
-scheduler.start()
-
 class TheBot(irc.client_aio.AioSimpleIRCClient):
     def __init__(self):
         irc.client.SimpleIRCClient.__init__(self)
@@ -59,6 +55,11 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
 
         # command handler stuff
         self.command_handler = CommandHandler(self, self.config.PREFIX)
+
+        # scheduler stuff
+        self.scheduler = AsyncIOScheduler()
+        self.scheduler.add_job(do_calc_happiness, 'cron', hour='11', jitter=1800)
+        self.scheduler.start()
         
     async def set_aio(self):
         self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID, "Authorization": "Bearer %s" % self.config.JWT_ID, "User-Agent": "Brie/0.1 (+https://brie.everything.moe/)"})
