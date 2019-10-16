@@ -59,6 +59,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         # scheduler stuff
         self.scheduler = AsyncIOScheduler()
         self.scheduler.add_job(do_calc_happiness, 'cron', hour='11', jitter=1800)
+        self.scheduler.add_job(self.reconnect_loop, 'interval', hours=3)
         self.scheduler.start()
         
     async def set_aio(self):
@@ -211,6 +212,14 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             if entry["id"] in ("moderator", "broadcaster"):
                 return True
         return False
+
+    async def reconnect_loop(self):
+        '''
+        Just reconnect to IRC like we start out.
+        This is meant to be run on a scheduler but can be called any time.
+        '''
+        log.info("Reconnecting to Twitch IRC to make sure connection remains alive.")
+        await self.connection.connect("irc.chat.twitch.tv", 6667, self.config.BOT_NAME, password=self.config.AUTH_ID)
 
 def main():
     '''
