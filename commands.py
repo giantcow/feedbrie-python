@@ -213,6 +213,7 @@ class CommandHandler:
             await self.parent.aio_session.close()
             await self.se.aio_session.close()
             self.parent.connection.quit()
+            self.parent.scheduler.shutdown(wait=False)
             return True
         return False
 

@@ -12,6 +12,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 from conf import *
 from commands import CommandHandler
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.base import STATE_STOPPED, STATE_RUNNING, STATE_PAUSED
 from db import do_calc_happiness
 
 sentry_logging = LoggingIntegration(
@@ -71,6 +72,10 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         while True:
             await asyncio.sleep(30)
+            if self.scheduler.state == STATE_STOPPED:
+                # at this point we assume the scheduler stopped by shutdown command
+                # so we kill everything explosively
+                sys.exit(0)
             if not self.connection.is_connected():
                 log.warning("Somehow, we lost the connection without knowing it.")
                 await self.connection.connect("irc.chat.twitch.tv", 6667, self.config.BOT_NAME, password=self.config.AUTH_ID)
