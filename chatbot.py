@@ -57,6 +57,9 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         # command handler stuff
         self.command_handler = CommandHandler(self, self.config.PREFIX)
 
+        # hydration reminder
+        self.loop.create_task(self.remind_drink_water())
+
         # scheduler stuff
         self.scheduler = AsyncIOScheduler()
         self.scheduler.add_job(do_calc_happiness, 'cron', hour='11', jitter=1800)
@@ -87,6 +90,18 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
             except:
                 log.exception(f"An exception occurred while updating the Live Status for {self.channel_id}")
 
+    async def remind_drink_water(self):
+        '''
+        Quick and dirty reminder to drink water every 30 minutes.
+        '''
+        msg = "Squeak squeak! Ms. Bobber told me to come remind all her students to drink water and stay hydrated! A healthy mouse is a happy mouse! brieYay"
+        while True:
+            await asyncio.sleep(30*60)
+            try:
+                if self.live:
+                    self.connection.privmsg(self.target, msg)
+            except:
+                log.exception("Failed to send hydration reminder in IRC chat")
 
     def on_welcome(self, connection, event):
         '''
