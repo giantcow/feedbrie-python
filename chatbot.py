@@ -94,7 +94,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         '''
         Quick and dirty reminder to drink water every 30 minutes.
         '''
-        msg = "Squeak squeak! Ms. Bobber told me to come remind all her students to drink water and stay hydrated! A healthy mouse is a happy mouse! brieYay Let your fellow students know by posting bobberDrink !"
+        msg = "/me Squeak squeak! Ms. Bobber told me to come remind all her students to drink water and stay hydrated! A healthy mouse is a happy mouse! brieYay Let your fellow students know by posting bobberDrink !"
         while True:
             await asyncio.sleep(45*60)
             try:
