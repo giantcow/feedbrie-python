@@ -28,6 +28,7 @@ class Conf:
         self.AUTH_ID = config.get("Password", "Token", fallback=Fallbacks.AUTH_ID)
         self.JWT_ID = config.get("Password", "SE_JWT_Token", fallback=Fallbacks.JWT_ID)
         self.CLIENT_ID = config.get("Password", "Client ID", fallback=Fallbacks.CLIENT_ID)
+        self.CLIENT_SECRET = config.get("Password", "Client Secret", fallback=Fallbacks.CLIENT_SECRET)
         self.SE_ID = config.get("Password", "SE_ID", fallback=Fallbacks.SE_ID)
 
         self.BOT_NAME = config.get("Names", "Bot Nickname", fallback=Fallbacks.BOT_NAME)
@@ -45,6 +46,7 @@ class Fallbacks:  # these will only get used if the user leaves the config.ini e
     SE_ID = "bad streamelements account id"
     BOT_NAME = "incorrect_configuration"
     CLIENT_ID = "got oofed"
+    CLIENT_SECRET = "b"
     CHANNEL_NAME = "shroud"
     HOST = "0fallback"
     PREFIX = "!"

@@ -42,6 +42,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.log = logging.getLogger("chatbot")         # Centralized logging
         
         # for twitch api stuff
+        self.auth_token = ""
         self.aio_session = None
         
         # shortcut to the async loop
@@ -49,6 +50,8 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         
         # we have to get the aiosession in an async way because deprecated methods
         self.loop.create_task(self.set_aio())
+        # and then refresh the token on the startup
+        self.loop.create_task(self.refresh_token())
 
         # loop every once in a while to check if channel is live
         self.loop.create_task(self.is_live_loop())
@@ -67,7 +70,43 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         self.scheduler.start()
         
     async def set_aio(self):
-        self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID, "Authorization": "Bearer %s" % self.config.JWT_ID, "User-Agent": "Brie/0.1 (+https://brie.everything.moe/)"})
+        self.aio_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID, "Authorization": "Bearer %s" % self.auth_token, "User-Agent": "Brie/0.1 (+https://brie.everything.moe/)"})
+
+    async def validate_token(self):
+        '''
+        Just verify that the token we have right now is correct.
+        We have to use "OAuth" instead of "Bearer" and the reason why isn't very clear
+        '''
+        tmp_session = aiohttp.ClientSession(headers={"Client-ID": self.config.auth_id, "Authorization": f"OAuth {self.auth_token}"})
+        try:
+            left = 0
+            async with tmp_session.get("https://id.twitch.tv/oauth2/validate") as response:
+                output = await response.json()
+                left = int(output["expires_in"])
+            # dead sessions stay dead
+            await tmp_session.close()
+            return left > 0
+        except:
+            # Probably failed to validate.
+            log.exception(f"There was an exception while validating the Auth Token.")
+            return False
+
+    async def refresh_token(self):
+        '''
+        Refresh the Bearer token for use in the Twitch API.
+        We don't need to specify scopes here at the moment since we aren't modifying anything or reading sensitive info.
+        '''
+        output = {}
+        async with self.aio_session.post(f"https://id.twitch.tv/oauth2/token?client_id={self.config.CLIENT_ID}&client_secret={self.config.CLIENT_SECRET}&grant_type=client_credentials") as response:
+            output = await response.json()
+            self.auth_token = output["access_token"]
+        # old sessions must die
+        try:
+            await self.aio_session.close()
+        except:
+            log.exception("A harmless exception occurred while closing the old ClientSession to refresh the Auth Token.")
+        await self.set_aio()
+        log.info(f"Refreshed Auth Token. Expire Time: {output["expires_in"]}")
 
     async def is_live_loop(self):
         '''
@@ -84,6 +123,12 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
                 await self.connection.connect("irc.chat.twitch.tv", 6667, self.config.BOT_NAME, password=self.config.AUTH_ID)
             if self.aio_session is None:
                 continue
+            if not await self.validate_token():
+                try:
+                    log.info("It appears the Auth Token failed to validate or is expired. Refreshing.")
+                    await self.refresh_token()
+                except:
+                    log.exception(f"An exception occurred while refreshing the Auth Token.")
             try:
                 status = await self.is_live()
                 self.live = status
