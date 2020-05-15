@@ -77,7 +77,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         Just verify that the token we have right now is correct.
         We have to use "OAuth" instead of "Bearer" and the reason why isn't very clear
         '''
-        tmp_session = aiohttp.ClientSession(headers={"Client-ID": self.config.auth_id, "Authorization": f"OAuth {self.auth_token}"})
+        tmp_session = aiohttp.ClientSession(headers={"Client-ID": self.config.CLIENT_ID, "Authorization": f"OAuth {self.auth_token}"})
         try:
             left = 0
             async with tmp_session.get("https://id.twitch.tv/oauth2/validate") as response:
