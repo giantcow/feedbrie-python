@@ -106,7 +106,7 @@ class TheBot(irc.client_aio.AioSimpleIRCClient):
         except:
             log.exception("A harmless exception occurred while closing the old ClientSession to refresh the Auth Token.")
         await self.set_aio()
-        log.info(f"Refreshed Auth Token. Expire Time: {output["expires_in"]}")
+        log.info(f"Refreshed Auth Token. Expire Time: {output['expires_in']}")
 
     async def is_live_loop(self):
         '''
